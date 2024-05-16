@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::order_info::OrderInfo;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SuccessfulPayment {
     pub currency: String,

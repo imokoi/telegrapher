@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::chat::Chat;
+use crate::models::message::Message;
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Giveaway {
     pub chats: Vec<Chat>,

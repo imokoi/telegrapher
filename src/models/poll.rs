@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::chat::Chat;
+use crate::models::message_entity::MessageEntity;
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PollOption {
     pub text: String,

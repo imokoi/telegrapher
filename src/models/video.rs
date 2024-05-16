@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::photo_size::PhotoSize;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Video {
     pub file_id: String,

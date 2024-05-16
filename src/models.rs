@@ -52,6 +52,7 @@ pub mod video_note;
 pub mod voice;
 pub mod web_app;
 pub mod webhook;
+pub mod sticker_set;
 
 // #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 // #[serde(rename_all = "lowercase")]

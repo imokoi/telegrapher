@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::shipping_query::ShippingAddress;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct OrderInfo {
     pub name: Option<String>,

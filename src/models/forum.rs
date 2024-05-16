@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::photo_size::PhotoSize;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VideoChatStarted {}
 

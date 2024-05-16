@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::chat::{Chat, ChatInviteLink};
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ChatMemberUpdated {
     pub chat: Chat,

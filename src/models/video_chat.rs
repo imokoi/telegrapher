@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VideoChatEnded {
     pub duration: u32,

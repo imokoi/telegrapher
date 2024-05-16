@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::allowed_update::AllowedUpdate;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WebhookInfo {
     pub url: String,

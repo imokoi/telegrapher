@@ -1,5 +1,29 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::animation::Animation;
+use crate::models::audio::Audio;
+use crate::models::chat::Chat;
+use crate::models::contact::Contact;
+use crate::models::dice::Dice;
+use crate::models::document::Document;
+use crate::models::forum::CallbackGame;
+use crate::models::game::Game;
+use crate::models::giveaway::{Giveaway, GiveawayWinners};
+use crate::models::invoice::Invoice;
+use crate::models::link_preview::LinkPreviewOptions;
+use crate::models::location::Location;
+use crate::models::message_entity::MessageEntity;
+use crate::models::photo_size::PhotoSize;
+use crate::models::poll::Poll;
+use crate::models::sticker::Sticker;
+use crate::models::story::Story;
+use crate::models::user::User;
+use crate::models::venue::Venue;
+use crate::models::video::Video;
+use crate::models::video_note::VideoNote;
+use crate::models::voice::Voice;
+use crate::models::web_app::WebAppInfo;
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TextQuote {
     pub text: String,

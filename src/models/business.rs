@@ -1,5 +1,6 @@
-use super::{chat::Chat, location::Location, sticker::Sticker, user::User};
 use serde::{Deserialize, Serialize};
+
+use super::{chat::Chat, location::Location, sticker::Sticker, user::User};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BusinessConnection {
@@ -18,14 +19,14 @@ pub struct BusinessMessagesDeleted {
     pub message_ids: Vec<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct BusinessIntro {
     pub title: String,
     pub message: String,
     pub sticker: Option<Sticker>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct BusinessLocation {
     pub address: String,
     pub location: Option<Location>,

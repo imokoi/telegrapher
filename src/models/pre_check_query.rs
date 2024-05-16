@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::order_info::OrderInfo;
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PreCheckoutQuery {
     pub id: String,

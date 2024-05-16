@@ -1,5 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::animation::Animation;
+use crate::models::message_entity::MessageEntity;
+use crate::models::photo_size::PhotoSize;
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Game {
     pub title: String,

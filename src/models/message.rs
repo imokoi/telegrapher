@@ -1,5 +1,34 @@
-use super::{chat::Chat, user::User};
 use serde::{Deserialize, Serialize};
+
+use crate::models::animation::Animation;
+use crate::models::audio::Audio;
+use crate::models::boost::ChatBoostAdded;
+use crate::models::contact::Contact;
+use crate::models::dice::Dice;
+use crate::models::document::Document;
+use crate::models::forum::{ChatShared, ForumTopicClosed, ForumTopicCreated, ForumTopicEdited, ForumTopicReopened, GeneralForumTopicHidden, GeneralForumTopicUnhidden, UsersShared, VideoChatScheduled, VideoChatStarted, WriteAccessAllowed};
+use crate::models::game::Game;
+use crate::models::giveaway::{Giveaway, GiveawayCompleted, GiveawayCreated, GiveawayWinners};
+use crate::models::invoice::Invoice;
+use crate::models::link_preview::LinkPreviewOptions;
+use crate::models::location::Location;
+use crate::models::message_entity::MessageEntity;
+use crate::models::passport_data::PassportData;
+use crate::models::photo_size::PhotoSize;
+use crate::models::poll::Poll;
+use crate::models::proximity_alert_triggred::ProximityAlertTriggered;
+use crate::models::reply::{InlineKeyboardMarkup, MessageOrigin, TextQuote};
+use crate::models::sticker::Sticker;
+use crate::models::story::Story;
+use crate::models::successful_payment::SuccessfulPayment;
+use crate::models::venue::Venue;
+use crate::models::video::Video;
+use crate::models::video_chat::{VideoChatEnded, VideoChatParticipantsInvited};
+use crate::models::video_note::VideoNote;
+use crate::models::voice::Voice;
+use crate::models::web_app::WebAppData;
+
+use super::{chat::Chat, user::User};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MessageId {

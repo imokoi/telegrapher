@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::chat::ChatAdministratorRights;
+use crate::models::reply::InlineKeyboardMarkup;
+use crate::models::web_app::WebAppInfo;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum ReplyMarkup {
@@ -9,14 +13,6 @@ pub enum ReplyMarkup {
     ForceReply(ForceReply),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SwitchInlineQueryChosenChat {
-    pub query: Option<String>,
-    pub allow_user_chats: Option<bool>,
-    pub allow_bot_chats: Option<bool>,
-    pub allow_group_chats: Option<bool>,
-    pub allow_channel_chats: Option<bool>,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ReplyKeyboardMarkup {

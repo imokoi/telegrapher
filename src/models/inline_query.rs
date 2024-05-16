@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::location::Location;
+use crate::models::message_entity::MessageEntity;
+use crate::models::parse_mode::ParseMode;
+use crate::models::reply::InlineKeyboardMarkup;
+use crate::models::user::User;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LabeledPrice {
     pub label: String,

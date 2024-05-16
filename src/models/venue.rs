@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::location::Location;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Venue {
     pub location: Location,

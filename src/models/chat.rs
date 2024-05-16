@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+use crate::models::user::User;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Chat {
     pub id: i64,
     /// Type of the chat, can be either “private”, “group”, “supergroup” or “channel”

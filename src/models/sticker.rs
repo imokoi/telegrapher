@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::models::file::File;
+use crate::models::mask_position::MaskPosition;
+use crate::models::photo_size::PhotoSize;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Sticker {
     pub file_id: String,
