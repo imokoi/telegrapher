@@ -1,7 +1,7 @@
 use crate::{
     bot::Bot,
-    models::{Message, ParseMode},
-    requests::SendMessageParams,
+    models::{parse_mode::ParseMode, Message},
+    params::send_message::SendMessageParams,
     TelegramError,
 };
 
@@ -23,10 +23,11 @@ async fn send_message(
         .await
 }
 
+// async fn send_photo()
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{models::Message, requests::SendMessageParams, responses::MethodResponse};
 
     #[tokio::test]
     async fn test_send_message() {

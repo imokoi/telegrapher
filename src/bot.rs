@@ -99,7 +99,7 @@ impl TelegramApi for Bot {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{models::User, requests::SendMessageParams, responses::MethodResponse};
+    use crate::{models::User, params::send_message::SendMessageParams, responses::MethodResponse};
 
     use super::*;
 
