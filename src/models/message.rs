@@ -6,7 +6,11 @@ use crate::models::boost::ChatBoostAdded;
 use crate::models::contact::Contact;
 use crate::models::dice::Dice;
 use crate::models::document::Document;
-use crate::models::forum::{ChatShared, ForumTopicClosed, ForumTopicCreated, ForumTopicEdited, ForumTopicReopened, GeneralForumTopicHidden, GeneralForumTopicUnhidden, UsersShared, VideoChatScheduled, VideoChatStarted, WriteAccessAllowed};
+use crate::models::forum::{
+    ChatShared, ForumTopicClosed, ForumTopicCreated, ForumTopicEdited, ForumTopicReopened,
+    GeneralForumTopicHidden, GeneralForumTopicUnhidden, UsersShared, VideoChatScheduled,
+    VideoChatStarted, WriteAccessAllowed,
+};
 use crate::models::game::Game;
 use crate::models::giveaway::{Giveaway, GiveawayCompleted, GiveawayCreated, GiveawayWinners};
 use crate::models::invoice::Invoice;
@@ -16,7 +20,7 @@ use crate::models::message_entity::MessageEntity;
 use crate::models::passport_data::PassportData;
 use crate::models::photo_size::PhotoSize;
 use crate::models::poll::Poll;
-use crate::models::proximity_alert_triggred::ProximityAlertTriggered;
+use crate::models::proximity_alert_trigger::ProximityAlertTriggered;
 use crate::models::reply::{InlineKeyboardMarkup, MessageOrigin, TextQuote};
 use crate::models::sticker::Sticker;
 use crate::models::story::Story;

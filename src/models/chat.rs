@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::user::User;
 
+use super::location::Location;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Chat {
     pub id: i64,

@@ -1,4 +1,4 @@
-use crate::{bot::Bot, models::User, TelegramError};
+use crate::{bot::Bot, models::user::User, TelegramError};
 
 pub async fn get_me(bot: &Bot) -> Result<User, TelegramError> {
     bot.do_request::<String, User>("getMe", None).await

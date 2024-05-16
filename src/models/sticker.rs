@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 use crate::models::file::File;
@@ -39,4 +41,24 @@ pub struct InputSticker {
     pub emoji_list: Vec<String>,
     pub mask_position: Option<MaskPosition>,
     pub keywords: Option<Vec<String>>,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum StickerFormat {
+    Static,
+    Animated,
+    Video,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum FileUpload {
+    InputFile(InputFile),
+    String(String),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct InputFile {
+    pub path: PathBuf,
 }

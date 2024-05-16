@@ -6,6 +6,8 @@ use crate::models::parse_mode::ParseMode;
 use crate::models::reply::InlineKeyboardMarkup;
 use crate::models::user::User;
 
+use super::link_preview::LinkPreviewOptions;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LabeledPrice {
     pub label: String,
@@ -358,4 +360,14 @@ pub struct InputInvoiceMessageContent {
     pub send_phone_number_to_provider: Option<bool>,
     pub send_email_to_provider: Option<bool>,
     pub is_flexible: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(untagged)]
+pub enum InputMessageContent {
+    Text(InputTextMessageContent),
+    Location(InputLocationMessageContent),
+    Venue(InputVenueMessageContent),
+    Contact(InputContactMessageContent),
+    Invoice(InputInvoiceMessageContent),
 }

@@ -1,6 +1,6 @@
 use crate::{
     bot::Bot,
-    models::{parse_mode::ParseMode, Message},
+    models::{message::Message, parse_mode::ParseMode},
     params::send_message::SendMessageParams,
     TelegramError,
 };

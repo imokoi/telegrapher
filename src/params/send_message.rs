@@ -1,4 +1,7 @@
-use crate::models::{self, parse_mode::ParseMode};
+use crate::models::{
+    link_preview::LinkPreviewOptions, message_entity::MessageEntity, parse_mode::ParseMode,
+    reply::ReplyParameters, reply_markup::ReplyMarkup,
+};
 
 #[derive(Default, Debug, Clone, PartialEq, serde::Serialize)]
 pub struct SendMessageParams {
@@ -17,10 +20,10 @@ pub struct SendMessageParams {
     pub parse_mode: Option<ParseMode>,
     /// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Vec<models::MessageEntity>>,
+    pub entities: Option<Vec<MessageEntity>>,
     /// Link preview generation options for the message
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub link_preview_options: Option<models::LinkPreviewOptions>,
+    pub link_preview_options: Option<LinkPreviewOptions>,
     /// Sends the message silently. Users will receive a notification with no sound.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disable_notification: Option<bool>,
@@ -29,8 +32,8 @@ pub struct SendMessageParams {
     pub protect_content: Option<bool>,
     /// Description of the message to reply to
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_parameters: Option<models::ReplyParameters>,
+    pub reply_parameters: Option<ReplyParameters>,
     /// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reply_markup: Option<models::ReplyMarkup>,
+    pub reply_markup: Option<ReplyMarkup>,
 }

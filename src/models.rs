@@ -28,19 +28,19 @@ pub mod menu_button;
 pub mod message;
 pub mod message_entity;
 pub mod order_info;
-pub mod others;
 pub mod parse_mode;
-pub mod passort_element_error;
 pub mod passport_data;
+pub mod passport_element_error;
 pub mod photo_size;
 pub mod poll;
 pub mod pre_check_query;
-pub mod proximity_alert_triggred;
+pub mod proximity_alert_trigger;
 pub mod reaction;
 pub mod reply;
 pub mod reply_markup;
 pub mod shipping_query;
 pub mod sticker;
+pub mod sticker_set;
 pub mod story;
 pub mod successful_payment;
 pub mod update;
@@ -52,25 +52,6 @@ pub mod video_note;
 pub mod voice;
 pub mod web_app;
 pub mod webhook;
-pub mod sticker_set;
-
-// #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
-// #[serde(rename_all = "lowercase")]
-// pub enum StickerFormat {
-//     Static,
-//     Animated,
-//     Video,
-// }
-
-// // #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-// // #[serde(untagged)]
-// // pub enum InputMessageContent {
-// //     Text(InputTextMessageContent),
-// //     Location(InputLocationMessageContent),
-// //     Venue(InputVenueMessageContent),
-// //     Contact(InputContactMessageContent),
-// //     Invoice(InputInvoiceMessageContent),
-// // }
 
 // #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 // #[serde(rename_all = "lowercase")]
