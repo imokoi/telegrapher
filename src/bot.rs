@@ -1,8 +1,15 @@
-use crate::{responses::MethodResponse, TelegramApi, TelegramError};
+use std::{fmt::Debug, sync::Arc, time::Duration};
+
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::de::DeserializeOwned;
-use std::{fmt::Debug, sync::Arc, time::Duration};
+
+use crate::{
+    methods,
+    models::{message::Message, update::UpdateContent},
+    responses::MethodResponse,
+    TelegramApi, TelegramError,
+};
 
 const TELEGRAM_API_URL: &str = "https://api.telegram.org";
 
@@ -15,7 +22,6 @@ pub struct Bot {
 }
 
 impl Bot {
-    #[must_use]
     pub fn new(token: &str) -> Self {
         let client = reqwest::Client::builder()
             .connect_timeout(Duration::from_secs(5))
@@ -33,6 +39,48 @@ impl Bot {
             token,
             api_url,
             client,
+        }
+    }
+
+    /// Start getting updates from telegram api server.
+    pub async fn start(&self) -> Result<(), TelegramError> {
+        let mut offset = 0;
+        loop {
+            let updates = methods::updates::get_updates(self, Some(offset), None, Some(60)).await;
+            match updates {
+                Ok(mut updates) => {
+                    // Sort updates by update_id
+                    updates.sort_by(|a, b| a.update_id.cmp(&b.update_id));
+                    for update in updates {
+                        offset = update.update_id + 1;
+                        let bot = Arc::new(self.clone());
+                        if let UpdateContent::Message(message) = update.content {
+                            tokio::spawn(async move {
+                                bot.process_message(message).await;
+                            });
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                }
+            }
+
+            tokio::time::sleep(Duration::from_secs_f32(0.2)).await;
+        }
+    }
+
+    async fn process_message(&self, message: Message) {
+        let chat_id = message.chat.id;
+        let text = message.text.unwrap_or_else(|| "".to_string());
+        let response = methods::message::send_message(self, chat_id, text, None).await;
+        match response {
+            Ok(_) => {
+                println!("Message sent successfully");
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+            }
         }
     }
 }

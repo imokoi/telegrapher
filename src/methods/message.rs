@@ -7,7 +7,7 @@ use crate::{
 
 /// Send a message to a chat.
 /// [The official docs](https://core.telegram.org/bots/api#sendmessage)
-async fn send_message(
+pub async fn send_message(
     bot: &Bot,
     chat_id: i64,
     text: String,

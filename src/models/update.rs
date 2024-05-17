@@ -17,7 +17,7 @@ use crate::models::shipping_query::ShippingQuery;
 /// [Official documentation.](https://core.telegram.org/bots/api#update)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Update {
-    pub update_id: u32,
+    pub update_id: i64,
 
     /// Maps to exactly one of the many optional fields
     /// from [the official documentation](https://core.telegram.org/bots/api#update).
