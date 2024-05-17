@@ -1,7 +1,9 @@
 use crate::models::allowed_update::AllowedUpdate;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Builder)]
+#[builder(setter(into), default)]
 pub struct GetUpdatesParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub offset: Option<i64>,

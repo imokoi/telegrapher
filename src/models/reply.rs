@@ -1,3 +1,4 @@
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 use crate::models::animation::Animation;
@@ -107,25 +108,6 @@ pub struct MessageOriginChannel {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct InlineKeyboardMarkup {
-    pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct InlineKeyboardButton {
-    pub text: String,
-    pub url: Option<String>,
-    pub login_url: Option<LoginUrl>,
-    pub callback_data: Option<String>,
-    pub web_app: Option<WebAppInfo>,
-    pub switch_inline_query: Option<String>,
-    pub switch_inline_query_current_chat: Option<String>,
-    pub switch_inline_query_chosen_chat: Option<SwitchInlineQueryChosenChat>,
-    pub callback_game: Option<CallbackGame>,
-    pub pay: Option<bool>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoginUrl {
     pub url: String,
     pub forward_text: Option<String>,
@@ -133,11 +115,17 @@ pub struct LoginUrl {
     pub request_write_access: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into))]
 pub struct SwitchInlineQueryChosenChat {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_user_chats: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_bot_chats: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_group_chats: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_channel_chats: Option<bool>,
 }

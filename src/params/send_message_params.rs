@@ -2,8 +2,10 @@ use crate::models::{
     link_preview::LinkPreviewOptions, message_entity::MessageEntity, parse_mode::ParseMode,
     reply::ReplyParameters, reply_markup::ReplyMarkup,
 };
+use derive_builder::Builder;
 
-#[derive(Default, Debug, Clone, PartialEq, serde::Serialize)]
+#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, Builder)]
+#[builder(setter(into), default)]
 pub struct SendMessageParams {
     /// Unique identifier of the business connection on behalf of which the message will be sent
     #[serde(skip_serializing_if = "Option::is_none")]

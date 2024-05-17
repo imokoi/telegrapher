@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 use crate::models::location::Location;
 use crate::models::message_entity::MessageEntity;
 use crate::models::parse_mode::ParseMode;
-use crate::models::reply::InlineKeyboardMarkup;
 use crate::models::user::User;
 
 use super::link_preview::LinkPreviewOptions;
+use super::reply_markup::InlineKeyboardMarkup;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LabeledPrice {
@@ -199,7 +199,7 @@ pub struct InlineQueryResultContact {
     pub thumbnail_height: Option<u32>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct InlineQueryResultGame {
     pub id: String,
     pub game_short_name: String,

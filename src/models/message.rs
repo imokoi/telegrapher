@@ -21,7 +21,7 @@ use crate::models::passport_data::PassportData;
 use crate::models::photo_size::PhotoSize;
 use crate::models::poll::Poll;
 use crate::models::proximity_alert_trigger::ProximityAlertTriggered;
-use crate::models::reply::{InlineKeyboardMarkup, MessageOrigin, TextQuote};
+use crate::models::reply::{MessageOrigin, TextQuote};
 use crate::models::sticker::Sticker;
 use crate::models::story::Story;
 use crate::models::successful_payment::SuccessfulPayment;
@@ -32,6 +32,7 @@ use crate::models::video_note::VideoNote;
 use crate::models::voice::Voice;
 use crate::models::web_app::WebAppData;
 
+use super::reply_markup::InlineKeyboardMarkup;
 use super::{chat::Chat, user::User};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]

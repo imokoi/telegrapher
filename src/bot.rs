@@ -5,8 +5,12 @@ use reqwest::Client;
 use serde::de::DeserializeOwned;
 
 use crate::{
-    methods,
-    models::{message::Message, update::UpdateContent},
+    models::{
+        message::Message,
+        reply_markup::{InlineKeyboardButtonBuilder, InlineKeyboardMarkup, ReplyMarkup},
+        update::UpdateContent,
+    },
+    params::{self, get_updates_params::GetUpdatesParamsBuilder},
     responses::MethodResponse,
     TelegramApi, TelegramError,
 };
@@ -44,21 +48,29 @@ impl Bot {
 
     /// Start getting updates from telegram api server.
     pub async fn start(&self) -> Result<(), TelegramError> {
-        let mut offset = 0;
+        let mut offset = None;
         loop {
-            let updates = methods::updates::get_updates(self, Some(offset), None, Some(60)).await;
+            let params = GetUpdatesParamsBuilder::default()
+                .offset(offset)
+                .timeout(60)
+                .build();
+            if let Err(_) = params {
+                eprintln!("Failed to build GetUpdatesParams");
+                continue;
+            }
+            let params = params.unwrap();
+            let updates = self.get_updates(&params).await;
             match updates {
                 Ok(mut updates) => {
                     // Sort updates by update_id
                     updates.sort_by(|a, b| a.update_id.cmp(&b.update_id));
                     for update in updates {
-                        offset = update.update_id + 1;
+                        offset = Some(update.update_id + 1);
                         let bot = Arc::new(self.clone());
-                        if let UpdateContent::Message(message) = update.content {
-                            tokio::spawn(async move {
-                                bot.process_message(message).await;
-                            });
-                        }
+                        println!("{:?}", update);
+                        tokio::spawn(async move {
+                            _ = bot.process_message(&update.content).await;
+                        });
                     }
                 }
                 Err(e) => {
@@ -66,22 +78,50 @@ impl Bot {
                 }
             }
 
-            tokio::time::sleep(Duration::from_secs_f32(0.2)).await;
+            tokio::time::sleep(Duration::from_secs_f32(1.0)).await;
         }
     }
 
-    async fn process_message(&self, message: Message) {
-        let chat_id = message.chat.id;
-        let text = message.text.unwrap_or_else(|| "".to_string());
-        let response = methods::message::send_message(self, chat_id, text, None).await;
-        match response {
-            Ok(_) => {
-                println!("Message sent successfully");
+    async fn process_message(&self, content: &UpdateContent) -> Result<(), TelegramError> {
+        match content {
+            UpdateContent::Message(message) => {
+                let button = InlineKeyboardButtonBuilder::default()
+                    .text("hello")
+                    .callback_data("hello callback".to_string())
+                    .build()
+                    .unwrap();
+
+                let inline_keyboards = vec![button];
+                let inline_keyboards_markup = InlineKeyboardMarkup {
+                    inline_keyboard: vec![inline_keyboards],
+                };
+                let inline_keyboards = ReplyMarkup::InlineKeyboardMarkup(inline_keyboards_markup);
+                let chat_id = message.chat.id;
+                let text = format!("You said: {}", message.text.as_ref().unwrap());
+                let param = params::send_message_params::SendMessageParamsBuilder::default()
+                    .chat_id(chat_id)
+                    .text(text.clone())
+                    .reply_markup(inline_keyboards)
+                    .build()?;
+                let response = self.send_message(&param).await?;
+                println!("{:?}", response);
             }
-            Err(e) => {
-                eprintln!("{}", e);
+            UpdateContent::CallbackQuery(message) => {
+                println!("{:?}", message);
+                // let chat_id = message.message.chat.id;
+                // let text = format!("You clicked: {}", message.data.as_ref().unwrap());
+                // let param = params::send_message_params::SendMessageParamsBuilder::default()
+                //     .chat_id(chat_id)
+                //     .text(text.clone())
+                //     .build()?;
+                // let response = self.send_message(&param).await?;
+                // println!("{:?}", response);
+            }
+            _ => {
+                println!("Unsupported update content");
             }
         }
+        Ok(())
     }
 }
 
@@ -116,7 +156,7 @@ impl Bot {
         P: serde::ser::Serialize + std::fmt::Debug + std::marker::Send,
         T: DeserializeOwned + Debug,
     {
-        let url = format!("{}bot{}/{}?", self.api_url(), self.token(), method);
+        let url = format!("{}bot{}/{}", self.api_url(), self.token(), method);
         let mut prepared_request = self
             .client
             .post(url)
@@ -147,7 +187,7 @@ impl TelegramApi for Bot {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{models::user::User, params::send_message::SendMessageParams};
+    use crate::{models::user::User, params::send_message_params::SendMessageParams};
 
     use super::*;
 

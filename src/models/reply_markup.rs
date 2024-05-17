@@ -1,8 +1,13 @@
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 use crate::models::chat::ChatAdministratorRights;
-use crate::models::reply::InlineKeyboardMarkup;
 use crate::models::web_app::WebAppInfo;
+
+use super::{
+    forum::CallbackGame,
+    reply::{LoginUrl, SwitchInlineQueryChosenChat},
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
@@ -13,6 +18,34 @@ pub enum ReplyMarkup {
     ForceReply(ForceReply),
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct InlineKeyboardMarkup {
+    pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Builder)]
+#[builder(setter(into), default)]
+pub struct InlineKeyboardButton {
+    pub text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub login_url: Option<LoginUrl>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub callback_data: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub web_app: Option<WebAppInfo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub switch_inline_query: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub switch_inline_query_current_chat: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub switch_inline_query_chosen_chat: Option<SwitchInlineQueryChosenChat>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub callback_game: Option<CallbackGame>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pay: Option<bool>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ReplyKeyboardMarkup {
