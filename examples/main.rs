@@ -1,4 +1,4 @@
-use telegrapher::bot::Bot;
+use core::bot::Bot;
 
 #[tokio::main]
 async fn main() {

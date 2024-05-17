@@ -7,8 +7,7 @@ use serde::de::DeserializeOwned;
 use crate::{
     models::{
         allowed_update::AllowedUpdate,
-        callback_query,
-        message::{MaybeInaccessibleMessage, Message},
+        message::MaybeInaccessibleMessage,
         reply_markup::{InlineKeyboardButtonBuilder, InlineKeyboardMarkup, ReplyMarkup},
         update::UpdateContent,
     },
@@ -17,7 +16,7 @@ use crate::{
         get_updates_params::GetUpdatesParamsBuilder,
     },
     responses::MethodResponse,
-    TelegramApi, TelegramError,
+    TelegramError,
 };
 
 const TELEGRAM_API_URL: &str = "https://api.telegram.org";
@@ -197,9 +196,6 @@ impl Bot {
         serde_json::to_string(params).map_err(|e| TelegramError::from(e))
     }
 }
-
-#[async_trait]
-impl TelegramApi for Bot {}
 
 #[cfg(test)]
 mod tests {
