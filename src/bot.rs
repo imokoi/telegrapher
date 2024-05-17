@@ -6,7 +6,9 @@ use serde::de::DeserializeOwned;
 
 use crate::{
     models::{
-        message::Message,
+        allowed_update::AllowedUpdate,
+        callback_query,
+        message::{MaybeInaccessibleMessage, Message},
         reply_markup::{InlineKeyboardButtonBuilder, InlineKeyboardMarkup, ReplyMarkup},
         update::UpdateContent,
     },
@@ -52,7 +54,8 @@ impl Bot {
         loop {
             let params = GetUpdatesParamsBuilder::default()
                 .offset(offset)
-                .timeout(60)
+                .timeout(10)
+                .allowed_updates(vec![AllowedUpdate::Message, AllowedUpdate::CallbackQuery])
                 .build();
             if let Err(_) = params {
                 eprintln!("Failed to build GetUpdatesParams");
@@ -67,9 +70,8 @@ impl Bot {
                     for update in updates {
                         offset = Some(update.update_id + 1);
                         let bot = Arc::new(self.clone());
-                        println!("{:?}", update);
                         tokio::spawn(async move {
-                            _ = bot.process_message(&update.content).await;
+                            _ = bot.process_update(&update.content).await;
                         });
                     }
                 }
@@ -77,12 +79,10 @@ impl Bot {
                     eprintln!("{}", e);
                 }
             }
-
-            tokio::time::sleep(Duration::from_secs_f32(1.0)).await;
         }
     }
 
-    async fn process_message(&self, content: &UpdateContent) -> Result<(), TelegramError> {
+    async fn process_update(&self, content: &UpdateContent) -> Result<(), TelegramError> {
         match content {
             UpdateContent::Message(message) => {
                 let button = InlineKeyboardButtonBuilder::default()
@@ -104,18 +104,21 @@ impl Bot {
                     .reply_markup(inline_keyboards)
                     .build()?;
                 let response = self.send_message(&param).await?;
-                println!("{:?}", response);
             }
-            UpdateContent::CallbackQuery(message) => {
-                println!("{:?}", message);
-                // let chat_id = message.message.chat.id;
-                // let text = format!("You clicked: {}", message.data.as_ref().unwrap());
-                // let param = params::send_message_params::SendMessageParamsBuilder::default()
-                //     .chat_id(chat_id)
-                //     .text(text.clone())
-                //     .build()?;
-                // let response = self.send_message(&param).await?;
-                // println!("{:?}", response);
+            UpdateContent::CallbackQuery(callback_query) => {
+                print!("{:?}", callback_query.message.as_ref().unwrap());
+                if let MaybeInaccessibleMessage::Message(message) =
+                    callback_query.message.as_ref().unwrap()
+                {
+                    let chat_id = message.chat.id;
+                    let text = format!("You clicked: {}", callback_query.data.as_ref().unwrap());
+                    let param = params::send_message_params::SendMessageParamsBuilder::default()
+                        .chat_id(chat_id)
+                        .text(text.clone())
+                        .build()?;
+                    let response = self.send_message(&param).await?;
+                    println!("{:?}", response);
+                }
             }
             _ => {
                 println!("Unsupported update content");
@@ -164,7 +167,7 @@ impl Bot {
 
         prepared_request = if let Some(data) = params {
             let json_string = Self::encode_params(&data)?;
-            println!("{}", json_string);
+            println!("request params: {}", json_string);
             prepared_request.body(json_string)
         } else {
             prepared_request
