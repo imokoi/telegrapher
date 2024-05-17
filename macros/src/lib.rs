@@ -4,17 +4,18 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn;
 
-macro_rules! my_vec {
-    ($($x:expr), *) => {
-        {
-            let mut temp_vec = Vec::new();
-            $(
-                temp_vec.push($x);
-            )*
-            temp_vec
-        }
-    };
-}
+// #[macro_export]
+// macro_rules! my_vec {
+//     ($($x:expr), *) => {
+//         {
+//             let mut temp_vec = Vec::new();
+//             $(
+//                 temp_vec.push($x);
+//             )*
+//             temp_vec
+//         }
+//     };
+// }
 
 #[proc_macro_derive(MyTrait)]
 pub fn my_trait_derive(input: TokenStream) -> TokenStream {
@@ -50,11 +51,6 @@ pub fn my_attribute(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
     gen.into()
 }
-
-// #[my_attribute]
-// fn my_function() {
-//     println!("Inside the function");
-// }
 
 #[proc_macro]
 pub fn make_answer(_item: TokenStream) -> TokenStream {
