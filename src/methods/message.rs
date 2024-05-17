@@ -1,17 +1,33 @@
 use crate::{
-    bot::Bot, models::message::Message, params::send_message_params::SendMessageParams,
+    bot::Bot,
+    models::message::Message,
+    params::{
+        answer_callback_query::AnswerCallbackQueryParams, send_message_params::SendMessageParams,
+    },
+    responses::MethodResponse,
     TelegramError,
 };
 
 impl Bot {
     /// Send a message to a chat.
     /// [The official docs](https://core.telegram.org/bots/api#sendmessage)
-    pub async fn send_message(&self, params: &SendMessageParams) -> Result<Message, TelegramError> {
+    pub async fn send_message(
+        &self,
+        params: &SendMessageParams,
+    ) -> Result<MethodResponse<Message>, TelegramError> {
         self.do_request::<SendMessageParams, Message>("sendMessage", Some(params))
             .await
     }
 
     // async fn send_photo()
+
+    pub async fn answer_callback_query(
+        &self,
+        params: &AnswerCallbackQueryParams,
+    ) -> Result<MethodResponse<bool>, TelegramError> {
+        self.do_request::<AnswerCallbackQueryParams, bool>("answerCallbackQuery", Some(params))
+            .await
+    }
 }
 
 #[cfg(test)]

@@ -12,7 +12,10 @@ use crate::{
         reply_markup::{InlineKeyboardButtonBuilder, InlineKeyboardMarkup, ReplyMarkup},
         update::UpdateContent,
     },
-    params::{self, get_updates_params::GetUpdatesParamsBuilder},
+    params::{
+        self, answer_callback_query::AnswerCallbackQueryParamsBuilder,
+        get_updates_params::GetUpdatesParamsBuilder,
+    },
     responses::MethodResponse,
     TelegramApi, TelegramError,
 };
@@ -62,21 +65,30 @@ impl Bot {
                 continue;
             }
             let params = params.unwrap();
-            let updates = self.get_updates(&params).await;
-            match updates {
-                Ok(mut updates) => {
-                    // Sort updates by update_id
+            let response = self.get_updates(&params).await;
+            if let Err(e) = response {
+                eprintln!("{}", e);
+                continue;
+            }
+
+            let updates_res = response.unwrap();
+            let result = updates_res.result;
+            match result {
+                Some(mut updates) => {
                     updates.sort_by(|a, b| a.update_id.cmp(&b.update_id));
                     for update in updates {
                         offset = Some(update.update_id + 1);
                         let bot = Arc::new(self.clone());
                         tokio::spawn(async move {
-                            _ = bot.process_update(&update.content).await;
+                            let result = bot.process_update(&update.content).await;
+                            if let Err(e) = result {
+                                eprintln!("{}", e);
+                            }
                         });
                     }
                 }
-                Err(e) => {
-                    eprintln!("{}", e);
+                None => {
+                    eprintln!("No updates found: {:?}", updates_res.description);
                 }
             }
         }
@@ -112,11 +124,11 @@ impl Bot {
                 {
                     let chat_id = message.chat.id;
                     let text = format!("You clicked: {}", callback_query.data.as_ref().unwrap());
-                    let param = params::send_message_params::SendMessageParamsBuilder::default()
-                        .chat_id(chat_id)
-                        .text(text.clone())
+                    let param = AnswerCallbackQueryParamsBuilder::default()
+                        .callback_query_id(callback_query.id.clone())
+                        .text(text)
                         .build()?;
-                    let response = self.send_message(&param).await?;
+                    let response = self.answer_callback_query(&param).await;
                     println!("{:?}", response);
                 }
             }
@@ -154,7 +166,7 @@ impl Bot {
         &self,
         method: &str,
         params: Option<&P>,
-    ) -> Result<T, TelegramError>
+    ) -> Result<MethodResponse<T>, TelegramError>
     where
         P: serde::ser::Serialize + std::fmt::Debug + std::marker::Send,
         T: DeserializeOwned + Debug,
@@ -162,20 +174,21 @@ impl Bot {
         let url = format!("{}bot{}/{}", self.api_url(), self.token(), method);
         let mut prepared_request = self
             .client
-            .post(url)
+            .post(url.clone())
             .header("Content-Type", "application/json");
 
         prepared_request = if let Some(data) = params {
             let json_string = Self::encode_params(&data)?;
-            println!("request params: {}", json_string);
+            println!("request url: {:?}, params: {}", url, json_string);
             prepared_request.body(json_string)
         } else {
             prepared_request
         };
 
         let response_str = prepared_request.send().await?.text().await?;
+        println!("response: {}", response_str);
         let response: MethodResponse<T> = serde_json::from_str(&response_str)?;
-        Ok(response.result)
+        Ok(response)
     }
 
     pub fn encode_params<T: serde::ser::Serialize + std::fmt::Debug>(
