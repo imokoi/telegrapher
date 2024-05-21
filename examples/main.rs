@@ -1,5 +1,5 @@
 use core::{bot::Bot, models::message::Message, BotCommands, CommandHandler, TelegramResult};
-use macros::BotCommands;
+use macros::{command_handler, BotCommands};
 use serde::Serialize;
 use std::{future::Future, pin::Pin};
 
@@ -19,7 +19,7 @@ async fn main() {
     let cmd = Commands::try_from(str);
     println!("{:?}", cmd);
 
-    bot.register_commands_handler::<Commands>(make_command_handler());
+    bot.register_commands_handler::<Commands>(command_handler);
 
     bot.start().await.unwrap();
 }
@@ -32,6 +32,7 @@ pub enum Commands {
     About,
 }
 
+#[command_handler]
 async fn command_handler(bot: Bot, msg: Message, cmd: String) -> TelegramResult<()> {
     let command = Commands::try_from(cmd.as_str())?;
     match command {
@@ -42,15 +43,4 @@ async fn command_handler(bot: Bot, msg: Message, cmd: String) -> TelegramResult<
         }
     };
     Ok(())
-}
-
-fn make_command_handler() -> CommandHandler {
-    fn inner(
-        bot: Bot,
-        message: Message,
-        command: String,
-    ) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>> {
-        Box::pin(command_handler(bot, message, command))
-    }
-    inner
 }

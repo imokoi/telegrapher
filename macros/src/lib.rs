@@ -91,6 +91,26 @@ fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 }
 
 #[proc_macro_attribute]
+pub fn command_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let input_fn = syn::parse_macro_input!(item as syn::ItemFn);
+
+    // 获取函数名称
+    let fn_name = &input_fn.sig.ident;
+    let fn_body = &input_fn.block;
+    let fn_inputs = &input_fn.sig.inputs;
+
+    let output = quote! {
+        fn #fn_name(#fn_inputs) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>> {
+            Box::pin(async move {
+                #fn_body
+            })
+        }
+    };
+
+    output.into()
+}
+
+#[proc_macro_attribute]
 pub fn my_attribute(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(item as syn::ItemFn);
     let name = &input.sig.ident;
