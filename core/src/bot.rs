@@ -55,12 +55,8 @@ impl Bot {
         self.handler.register_update_handler(handler);
     }
 
-    pub fn register_commands_handler(
-        &mut self,
-        commands: impl BotCommands,
-        handler: CommandHandler,
-    ) {
-        self.handler.register_command_handler(commands, handler);
+    pub fn register_commands_handler<T: BotCommands>(&mut self, handler: CommandHandler) {
+        self.handler.register_command_handler::<T>(handler);
     }
 
     /// Start getting updates from telegram api server.
@@ -109,25 +105,37 @@ impl Bot {
     async fn process_update(&self, content: &UpdateContent) -> Result<(), TelegramError> {
         match content {
             UpdateContent::Message(message) => {
-                let button = InlineKeyboardButtonBuilder::default()
-                    .text("hello")
-                    .callback_data("hello callback".to_string())
-                    .build()
-                    .unwrap();
+                // let button = InlineKeyboardButtonBuilder::default()
+                //     .text("hello")
+                //     .callback_data("hello callback".to_string())
+                //     .build()
+                //     .unwrap();
 
-                let inline_keyboards = vec![button];
-                let inline_keyboards_markup = InlineKeyboardMarkup {
-                    inline_keyboard: vec![inline_keyboards],
-                };
-                let inline_keyboards = ReplyMarkup::InlineKeyboardMarkup(inline_keyboards_markup);
-                let chat_id = message.chat.id;
-                let text = format!("You said: {}", message.text.as_ref().unwrap());
-                let param = params::send_message_params::SendMessageParamsBuilder::default()
-                    .chat_id(chat_id)
-                    .text(text.clone())
-                    .reply_markup(inline_keyboards)
-                    .build()?;
-                let response = self.send_message(&param).await?;
+                // let inline_keyboards = vec![button];
+                // let inline_keyboards_markup = InlineKeyboardMarkup {
+                //     inline_keyboard: vec![inline_keyboards],
+                // };
+                // let inline_keyboards = ReplyMarkup::InlineKeyboardMarkup(inline_keyboards_markup);
+                // let chat_id = message.chat.id;
+                // let text = format!("You said: {}", message.text.as_ref().unwrap());
+                // let param = params::send_message_params::SendMessageParamsBuilder::default()
+                //     .chat_id(chat_id)
+                //     .text(text.clone())
+                //     .reply_markup(inline_keyboards)
+                //     .build()?;
+                // let response = self.send_message(&param).await?;
+
+                // if the content of message is a command
+                if let Some(text) = message.text.as_ref() {
+                    if text.starts_with('/') {
+                        let command = text.split_whitespace().next().unwrap();
+                        if self.handler.commands.contains(&command.to_string()) {
+                            let handler = self.handler.command_handler.as_ref().unwrap();
+                            let _ =
+                                handler(self.clone(), message.clone(), command.to_string()).await;
+                        }
+                    }
+                }
             }
             UpdateContent::CallbackQuery(callback_query) => {
                 print!("{:?}", callback_query.message.as_ref().unwrap());

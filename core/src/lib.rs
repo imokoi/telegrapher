@@ -1,8 +1,10 @@
-use std::cell::RefCell;
-
 use bot::Bot;
-use models::update::UpdateContent;
+use models::{message::Message, update::UpdateContent};
 use once_cell::sync::OnceCell;
+use std::cell::RefCell;
+use std::future::Future;
+use std::pin::Pin;
+use std::sync;
 
 pub mod bot;
 pub mod methods;
@@ -12,16 +14,17 @@ pub mod requests;
 pub mod responses;
 
 pub type TelegramError = Box<dyn std::error::Error + Send + Sync>;
-
 pub type TelegramResult<T> = Result<T, TelegramError>;
-pub trait BotCommands {
+
+pub trait BotCommands: Sized {
     fn command_name(&self) -> &'static str;
 
-    // fn to_name_vec() -> Vec<&'static str>;
+    fn to_name_vec() -> Vec<&'static str>;
 }
 
 type UpdateHandler = fn(bot: Bot, content: UpdateContent) -> TelegramResult<()>;
-type CommandHandler = fn(bot: Bot, content: UpdateContent) -> TelegramResult<()>;
+pub type CommandHandler =
+    fn(Bot, Message, String) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>>;
 
 #[derive(Debug, Default, Clone)]
 pub struct EventHandler {
@@ -35,12 +38,10 @@ impl EventHandler {
         self.update_handler = Some(handler);
     }
 
-    pub fn register_command_handler(
-        &mut self,
-        commands: impl BotCommands,
-        handler: CommandHandler,
-    ) {
+    pub fn register_command_handler<T: BotCommands>(&mut self, handler: CommandHandler) {
         self.command_handler = Some(handler);
-        self.commands.push(commands.command_name().to_string());
+        for cmd in T::to_name_vec() {
+            self.commands.push(cmd.to_string());
+        }
     }
 }
