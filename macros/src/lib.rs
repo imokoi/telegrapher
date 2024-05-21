@@ -4,39 +4,38 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn;
 
-// #[macro_export]
-// macro_rules! my_vec {
-//     ($($x:expr), *) => {
-//         {
-//             let mut temp_vec = Vec::new();
-//             $(
-//                 temp_vec.push($x);
-//             )*
-//             temp_vec
-//         }
-//     };
-// }
-
-#[proc_macro_derive(MyTrait)]
-pub fn my_trait_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(BotCommands)]
+pub fn bot_commands_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
-    impl_my_trait(&ast)
+    impl_bot_commands(&ast)
 }
 
-fn impl_my_trait(ast: &syn::DeriveInput) -> TokenStream {
+fn impl_bot_commands(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
-    let gen = quote! {
-        impl MyTrait for #name {
-            fn hello(&self) {
-                println!("Hello, I'm a {}", stringify!(#name));
+    let gen = match ast.data {
+        syn::Data::Enum(ref data_enum) => {
+            let variant_names = data_enum.variants.iter().map(|v| {
+                let ident = &v.ident;
+                let cmd_name = format!("/{}", ident.to_string().to_lowercase());
+                quote! {
+                    Commands::#ident => #cmd_name,
+                }
+            });
+
+            quote! {
+                impl #name {
+                    pub fn command_name(&self) -> &'static str {
+                        match self {
+                            #( #variant_names )*
+                        }
+                    }
+                }
             }
         }
+        _ => panic!("#[derive(BotCommands)] is only defined for enums"),
     };
     gen.into()
 }
-
-// #[derive(MyTrait)]
-// struct MyStruct;
 
 #[proc_macro_attribute]
 pub fn my_attribute(attr: TokenStream, item: TokenStream) -> TokenStream {

@@ -1,6 +1,5 @@
 use std::{fmt::Debug, sync::Arc, time::Duration};
 
-use async_trait::async_trait;
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 
@@ -16,7 +15,7 @@ use crate::{
         get_updates_params::GetUpdatesParamsBuilder,
     },
     responses::MethodResponse,
-    TelegramError,
+    BotCommands, CommandHandler, EventHandler, TelegramError, TelegramResult, UpdateHandler,
 };
 
 const TELEGRAM_API_URL: &str = "https://api.telegram.org";
@@ -27,6 +26,7 @@ pub struct Bot {
     token: Arc<str>,
     api_url: Arc<reqwest::Url>,
     client: reqwest::Client,
+    handler: EventHandler,
 }
 
 impl Bot {
@@ -47,7 +47,20 @@ impl Bot {
             token,
             api_url,
             client,
+            handler: EventHandler::default(),
         }
+    }
+
+    pub fn register_update_handler(&mut self, handler: UpdateHandler) {
+        self.handler.register_update_handler(handler);
+    }
+
+    pub fn register_commands_handler(
+        &mut self,
+        commands: impl BotCommands,
+        handler: CommandHandler,
+    ) {
+        self.handler.register_command_handler(commands, handler);
     }
 
     /// Start getting updates from telegram api server.
@@ -132,7 +145,7 @@ impl Bot {
                 }
             }
             _ => {
-                println!("Unsupported update content");
+                _ = self.handler.update_handler.as_ref().unwrap()(self.clone(), content.clone());
             }
         }
         Ok(())
