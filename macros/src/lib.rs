@@ -35,7 +35,7 @@ fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
 fn impl_command_name(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", ident.to_string().to_lowercase());
+        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
         quote! {
             Commands::#ident => #cmd_name,
         }
@@ -54,7 +54,7 @@ fn impl_command_name(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 fn impl_to_name_vec(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", ident.to_string().to_lowercase());
+        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
         quote! {
             #cmd_name,
         }
@@ -73,7 +73,8 @@ fn impl_to_name_vec(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", ident.to_string().to_lowercase());
+        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
+        println!("cmd_name: {}", cmd_name);
         quote! {
             #cmd_name => Ok(Commands::#ident),
         }
@@ -110,20 +111,6 @@ pub fn command_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     output.into()
 }
 
-#[proc_macro_attribute]
-pub fn my_attribute(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = syn::parse_macro_input!(item as syn::ItemFn);
-    let name = &input.sig.ident;
-    let block = &input.block;
-    let gen = quote! {
-        fn #name() {
-            println!("Function {} is called", stringify!(#name));
-            #block
-        }
-    };
-    gen.into()
-}
-
 #[proc_macro]
 pub fn make_answer(_item: TokenStream) -> TokenStream {
     "fn answer() -> u32 { 42 }".parse().unwrap()
@@ -134,4 +121,19 @@ fn get_enum_data(input: &DeriveInput) -> syn::DataEnum {
         syn::Data::Enum(ref data) => data.clone(),
         _ => panic!("#[derive(BotCommands)] is only defined for enums"),
     }
+}
+
+fn to_snake_case(s: &str) -> String {
+    let mut snake_case = String::new();
+    for (i, c) in s.chars().enumerate() {
+        if c.is_uppercase() {
+            if i != 0 {
+                snake_case.push('_');
+            }
+            snake_case.push(c.to_ascii_lowercase());
+        } else {
+            snake_case.push(c);
+        }
+    }
+    snake_case
 }

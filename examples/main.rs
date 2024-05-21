@@ -15,7 +15,7 @@ async fn main() {
     let names = Commands::to_name_vec();
     println!("{:?}", names);
 
-    let str = "/menu";
+    let str = "/help_message";
     let cmd = Commands::try_from(str);
     println!("{:?}", cmd);
 
@@ -24,8 +24,7 @@ async fn main() {
     bot.start().await.unwrap();
 }
 
-#[derive(BotCommands, Debug, Serialize)]
-#[serde(rename_all = "snake_case")]
+#[derive(BotCommands, Debug)]
 pub enum Commands {
     HelpMessage,
     Menu,
@@ -36,7 +35,9 @@ pub enum Commands {
 async fn command_handler(bot: Bot, msg: Message, cmd: String) -> TelegramResult<()> {
     let command = Commands::try_from(cmd.as_str())?;
     match command {
-        Commands::HelpMessage => {}
+        Commands::HelpMessage => {
+            println!("Help message command");
+        }
         Commands::Menu => {}
         Commands::About => {
             println!("About command");
