@@ -33,6 +33,7 @@ where
 
     prepared_request = if let Some(data) = params {
         let json_string = encode_params(&data)?;
+        println!("json string: {}", json_string);
         prepared_request.body(json_string)
     } else {
         prepared_request
