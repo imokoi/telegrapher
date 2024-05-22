@@ -52,16 +52,16 @@ pub enum BotCommandScope {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BotCommandScopeChat {
-    pub chat_id: String,
+    pub chat_id: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BotCommandScopeChatAdministrators {
-    pub chat_id: String,
+    pub chat_id: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BotCommandScopeChatMember {
-    pub chat_id: String,
+    pub chat_id: i64,
     pub user_id: u64,
 }
