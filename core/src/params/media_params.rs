@@ -13,7 +13,7 @@ pub struct SendPhotoParams {
     pub business_connection_id: Option<String>,
 
     #[builder(setter(into))]
-    pub chat_id: ChatId,
+    pub chat_id: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]

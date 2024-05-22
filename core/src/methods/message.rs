@@ -1,9 +1,7 @@
 use crate::{
     bot::Bot,
     models::message::Message,
-    params::{
-        answer_callback_query::AnswerCallbackQueryParams, send_message_params::SendMessageParams,
-    },
+    params::{callback_query_param::AnswerCallbackQueryParams, message_params::SendMessageParams},
     responses::MethodResponse,
     TelegramError,
 };
@@ -38,7 +36,7 @@ mod tests {
             parse_mode::ParseMode,
             reply_markup::{InlineKeyboardButtonBuilder, InlineKeyboardMarkup, ReplyMarkup},
         },
-        params::send_message_params::SendMessageParamsBuilder,
+        params::message_params::SendMessageParamsBuilder,
     };
 
     #[tokio::test]

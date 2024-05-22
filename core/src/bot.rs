@@ -4,18 +4,10 @@ use reqwest::Client;
 use serde::de::DeserializeOwned;
 
 use crate::{
-    models::{
-        allowed_update::AllowedUpdate,
-        message::MaybeInaccessibleMessage,
-        reply_markup::{InlineKeyboardButtonBuilder, InlineKeyboardMarkup, ReplyMarkup},
-        update::UpdateContent,
-    },
-    params::{
-        self, answer_callback_query::AnswerCallbackQueryParamsBuilder,
-        get_updates_params::GetUpdatesParamsBuilder,
-    },
+    models::{allowed_update::AllowedUpdate, update::UpdateContent},
+    params::updates_params::GetUpdatesParamsBuilder,
     responses::MethodResponse,
-    BotCommands, CommandHandler, EventHandler, TelegramError, TelegramResult, UpdateHandler,
+    BotCommands, CommandHandler, EventHandler, TelegramError, UpdateHandler,
 };
 
 const TELEGRAM_API_URL: &str = "https://api.telegram.org";
@@ -224,7 +216,7 @@ impl Bot {
 
 #[cfg(test)]
 mod tests {
-    use crate::{models::user::User, params::send_message_params::SendMessageParams};
+    use crate::{models::user::User, params::message_params::SendMessageParams};
 
     use super::*;
 

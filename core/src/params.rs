@@ -1,5 +1,5 @@
-pub mod answer_callback_query;
+pub mod callback_query_param;
 pub mod command_params;
-pub mod get_updates_params;
-pub mod send_media;
-pub mod send_message_params;
+pub mod media_params;
+pub mod message_params;
+pub mod updates_params;

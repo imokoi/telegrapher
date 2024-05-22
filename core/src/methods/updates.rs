@@ -1,4 +1,4 @@
-use crate::params::get_updates_params::GetUpdatesParams;
+use crate::params::updates_params::GetUpdatesParams;
 use crate::responses::MethodResponse;
 use crate::{bot::Bot, models::update::Update, TelegramError};
 
@@ -16,7 +16,7 @@ impl Bot {
 mod tests {
     use super::*;
     use crate::{
-        models::allowed_update::AllowedUpdate, params::get_updates_params::GetUpdatesParamsBuilder,
+        models::allowed_update::AllowedUpdate, params::updates_params::GetUpdatesParamsBuilder,
     };
 
     #[tokio::test]
