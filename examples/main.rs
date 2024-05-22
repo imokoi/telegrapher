@@ -1,9 +1,6 @@
 use core::{
     bot::Bot,
-    models::{
-        message::Message,
-        update::{UpdateContent},
-    },
+    models::{message::Message, update::UpdateContent},
     BotCommands, TelegramResult,
 };
 use macros::{event_handler, BotCommands};
