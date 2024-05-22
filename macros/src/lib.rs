@@ -2,6 +2,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
+use std::{future::Future, pin::Pin};
 use syn::{self, DataEnum, DeriveInput, Ident};
 
 #[proc_macro_derive(BotCommands)]
@@ -101,7 +102,7 @@ pub fn event_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let fn_inputs = &input_fn.sig.inputs;
 
     let output = quote! {
-        fn #fn_name(#fn_inputs) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>> {
+        pub fn #fn_name(#fn_inputs) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>> {
             Box::pin(async move {
                 #fn_body
             })
