@@ -25,7 +25,7 @@ impl Bot {
         .await
     }
 
-    async fn edit_message(
+    pub async fn edit_message(
         &self,
         params: &EditMessageTextParams,
     ) -> Result<MethodResponse<Message>, TelegramError> {
