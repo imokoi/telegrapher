@@ -73,5 +73,5 @@ pub struct EditMessageTextParams {
 #[builder(setter(into), default)]
 pub struct DeleteMessageParams {
     pub chat_id: i64,
-    pub message_ids: Vec<i64>,
+    pub message_id: i64,
 }
