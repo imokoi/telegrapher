@@ -1,4 +1,3 @@
-use super::command_params::ChatId;
 use crate::models::{
     message_entity::MessageEntity, parse_mode::ParseMode, reply::ReplyParameters,
     reply_markup::ReplyMarkup, sticker::FileUpload,

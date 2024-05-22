@@ -6,20 +6,36 @@ use serde::{Deserialize, Serialize};
 #[builder(setter(into))]
 pub struct SetMyCommandsParams {
     commands: Vec<BotCommand>,
-    scope: BotCommandScope,
-    language_code: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option), default)]
+    scope: Option<BotCommandScope>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option), default)]
+    language_code: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Builder)]
 pub struct DeleteMyCommandsParams {
-    scope: BotCommandScope,
-    language_code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option), default)]
+    scope: Option<BotCommandScope>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option), default)]
+    language_code: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Builder)]
 pub struct GetMyCommandsParams {
-    scope: BotCommandScope,
-    language_code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option), default)]
+    scope: Option<BotCommandScope>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(setter(into, strip_option), default)]
+    language_code: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -36,35 +52,16 @@ pub enum BotCommandScope {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BotCommandScopeChat {
-    pub chat_id: ChatId,
+    pub chat_id: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BotCommandScopeChatAdministrators {
-    pub chat_id: ChatId,
+    pub chat_id: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BotCommandScopeChatMember {
-    pub chat_id: ChatId,
+    pub chat_id: String,
     pub user_id: u64,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(untagged)]
-pub enum ChatId {
-    Integer(i64),
-    String(String),
-}
-
-impl From<i64> for ChatId {
-    fn from(id: i64) -> Self {
-        Self::Integer(id)
-    }
-}
-
-impl From<String> for ChatId {
-    fn from(id: String) -> Self {
-        Self::String(id)
-    }
 }
