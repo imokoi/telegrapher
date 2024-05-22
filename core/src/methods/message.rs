@@ -3,7 +3,7 @@ use crate::{
     models::message::Message,
     params::{
         callback_query_param::AnswerCallbackQueryParams,
-        message_params::{EditMessageTextParams, SendMessageParams},
+        message_params::{DeleteMessageParams, EditMessageTextParams, SendMessageParams},
     },
     requests,
     responses::MethodResponse,
@@ -33,6 +33,18 @@ impl Bot {
             "editMessageText",
             self.token(),
             Some(params),
+        )
+        .await
+    }
+
+    pub async fn delete_message(
+        &self,
+        params: &DeleteMessageParams,
+    ) -> Result<MethodResponse<bool>, TelegramError> {
+        requests::post_request::<DeleteMessageParams, bool>(
+            "deleteMessage",
+            self.token(),
+            Some(&params),
         )
         .await
     }

@@ -68,3 +68,10 @@ pub struct EditMessageTextParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reply_markup: Option<InlineKeyboardMarkup>,
 }
+
+#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, Builder)]
+#[builder(setter(into), default)]
+pub struct DeleteMessageParams {
+    pub chat_id: i64,
+    pub message_ids: Vec<i64>,
+}
