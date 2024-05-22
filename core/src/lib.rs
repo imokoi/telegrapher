@@ -22,7 +22,8 @@ pub trait BotCommands: Sized {
     fn to_name_vec() -> Vec<&'static str>;
 }
 
-type UpdateHandler = fn(bot: Bot, content: UpdateContent) -> TelegramResult<()>;
+type UpdateHandler =
+    fn(Bot, UpdateContent) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>>;
 pub type CommandHandler =
     fn(Bot, Message, String) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>>;
 

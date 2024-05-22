@@ -92,7 +92,7 @@ fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn command_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn event_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn = syn::parse_macro_input!(item as syn::ItemFn);
 
     // 获取函数名称

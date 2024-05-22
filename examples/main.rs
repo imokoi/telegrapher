@@ -1,5 +1,12 @@
-use core::{bot::Bot, models::message::Message, BotCommands, CommandHandler, TelegramResult};
-use macros::{command_handler, BotCommands};
+use core::{
+    bot::Bot,
+    models::{
+        message::Message,
+        update::{Update, UpdateContent},
+    },
+    BotCommands, CommandHandler, TelegramResult,
+};
+use macros::{event_handler, BotCommands};
 use serde::Serialize;
 use std::{future::Future, pin::Pin};
 
@@ -20,6 +27,7 @@ async fn main() {
     println!("{:?}", cmd);
 
     bot.register_commands_handler::<Commands>(command_handler);
+    bot.register_update_handler(update_handler);
 
     bot.start().await.unwrap();
 }
@@ -31,7 +39,7 @@ pub enum Commands {
     About,
 }
 
-#[command_handler]
+#[event_handler]
 async fn command_handler(bot: Bot, msg: Message, cmd: String) -> TelegramResult<()> {
     let command = Commands::try_from(cmd.as_str())?;
     match command {
@@ -43,5 +51,11 @@ async fn command_handler(bot: Bot, msg: Message, cmd: String) -> TelegramResult<
             println!("About command");
         }
     };
+    Ok(())
+}
+
+#[event_handler]
+async fn update_handler(bot: Bot, update: UpdateContent) -> TelegramResult<()> {
+    println!("Update handler");
     Ok(())
 }

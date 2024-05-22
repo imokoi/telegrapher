@@ -88,10 +88,7 @@ impl Bot {
                         offset = Some(update.update_id + 1);
                         let bot = Arc::new(self.clone());
                         tokio::spawn(async move {
-                            let result = bot.process_update(&update.content).await;
-                            if let Err(e) = result {
-                                eprintln!("{}", e);
-                            }
+                            _ = bot.process_update(&update.content).await;
                         });
                     }
                 }
@@ -102,7 +99,7 @@ impl Bot {
         }
     }
 
-    async fn process_update(&self, content: &UpdateContent) -> Result<(), TelegramError> {
+    async fn process_update(&self, content: &UpdateContent) {
         match content {
             UpdateContent::Message(message) => {
                 // let button = InlineKeyboardButtonBuilder::default()
@@ -130,33 +127,40 @@ impl Bot {
                     if text.starts_with('/') {
                         let command = text.split_whitespace().next().unwrap();
                         if self.handler.commands.contains(&command.to_string()) {
-                            let handler = self.handler.command_handler.as_ref().unwrap();
-                            let _ =
-                                handler(self.clone(), message.clone(), command.to_string()).await;
+                            if let Some(handler) = self.handler.command_handler {
+                                _ = handler(self.clone(), message.clone(), command.to_string())
+                                    .await;
+                                return;
+                            }
                         }
                     }
                 }
-            }
-            UpdateContent::CallbackQuery(callback_query) => {
-                print!("{:?}", callback_query.message.as_ref().unwrap());
-                if let MaybeInaccessibleMessage::Message(message) =
-                    callback_query.message.as_ref().unwrap()
-                {
-                    let chat_id = message.chat.id;
-                    let text = format!("You clicked: {}", callback_query.data.as_ref().unwrap());
-                    let param = AnswerCallbackQueryParamsBuilder::default()
-                        .callback_query_id(callback_query.id.clone())
-                        .text(text)
-                        .build()?;
-                    let response = self.answer_callback_query(&param).await;
-                    println!("{:?}", response);
+
+                if let Some(handler) = self.handler.update_handler {
+                    _ = handler(self.clone(), content.clone()).await;
                 }
             }
+            // UpdateContent::CallbackQuery(callback_query) => {
+            //     print!("{:?}", callback_query.message.as_ref().unwrap());
+            //     if let MaybeInaccessibleMessage::Message(message) =
+            //         callback_query.message.as_ref().unwrap()
+            //     {
+            //         let chat_id = message.chat.id;
+            //         let text = format!("You clicked: {}", callback_query.data.as_ref().unwrap());
+            //         let param = AnswerCallbackQueryParamsBuilder::default()
+            //             .callback_query_id(callback_query.id.clone())
+            //             .text(text)
+            //             .build()?;
+            //         let response = self.answer_callback_query(&param).await;
+            //         println!("{:?}", response);
+            //     }
+            // }
             _ => {
-                _ = self.handler.update_handler.as_ref().unwrap()(self.clone(), content.clone());
+                if let Some(handler) = self.handler.update_handler {
+                    _ = handler(self.clone(), content.clone()).await;
+                }
             }
         }
-        Ok(())
     }
 }
 
