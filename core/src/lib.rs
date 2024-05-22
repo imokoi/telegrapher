@@ -13,6 +13,8 @@ pub mod params;
 pub mod requests;
 pub mod responses;
 
+pub const TELEGRAM_API_URL: &str = "https://api.telegram.org";
+
 pub type TelegramError = Box<dyn std::error::Error + Send + Sync>;
 pub type TelegramResult<T> = Result<T, TelegramError>;
 

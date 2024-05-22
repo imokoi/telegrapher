@@ -2,12 +2,11 @@ use core::{
     bot::Bot,
     models::{
         message::Message,
-        update::{Update, UpdateContent},
+        update::{UpdateContent},
     },
-    BotCommands, CommandHandler, TelegramResult,
+    BotCommands, TelegramResult,
 };
 use macros::{event_handler, BotCommands};
-use serde::Serialize;
 use std::{future::Future, pin::Pin};
 
 #[tokio::main]

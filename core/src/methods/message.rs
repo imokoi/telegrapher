@@ -2,6 +2,7 @@ use crate::{
     bot::Bot,
     models::message::Message,
     params::{callback_query_param::AnswerCallbackQueryParams, message_params::SendMessageParams},
+    requests,
     responses::MethodResponse,
     TelegramError,
 };
@@ -13,8 +14,12 @@ impl Bot {
         &self,
         params: &SendMessageParams,
     ) -> Result<MethodResponse<Message>, TelegramError> {
-        self.do_request::<SendMessageParams, Message>("sendMessage", Some(params))
-            .await
+        requests::post_request::<SendMessageParams, Message>(
+            "sendMessage",
+            self.token(),
+            Some(params),
+        )
+        .await
     }
 
     // async fn send_photo()
@@ -23,8 +28,12 @@ impl Bot {
         &self,
         params: &AnswerCallbackQueryParams,
     ) -> Result<MethodResponse<bool>, TelegramError> {
-        self.do_request::<AnswerCallbackQueryParams, bool>("answerCallbackQuery", Some(params))
-            .await
+        requests::post_request::<AnswerCallbackQueryParams, bool>(
+            "answerCallbackQuery",
+            self.token(),
+            Some(params),
+        )
+        .await
     }
 }
 
