@@ -1,6 +1,9 @@
 use crate::models::{
-    link_preview::LinkPreviewOptions, message_entity::MessageEntity, parse_mode::ParseMode,
-    reply::ReplyParameters, reply_markup::ReplyMarkup,
+    link_preview::LinkPreviewOptions,
+    message_entity::MessageEntity,
+    parse_mode::ParseMode,
+    reply::ReplyParameters,
+    reply_markup::{InlineKeyboardMarkup, ReplyMarkup},
 };
 use derive_builder::Builder;
 
@@ -38,4 +41,30 @@ pub struct SendMessageParams {
     /// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reply_markup: Option<ReplyMarkup>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, Builder)]
+#[builder(setter(into), default)]
+pub struct EditMessageTextParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub chat_id: Option<i64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<i64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_message_id: Option<String>,
+    pub text: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parse_mode: Option<ParseMode>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entities: Option<Vec<MessageEntity>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub link_preview_options: Option<LinkPreviewOptions>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reply_markup: Option<InlineKeyboardMarkup>,
 }

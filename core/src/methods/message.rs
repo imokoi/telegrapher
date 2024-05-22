@@ -1,7 +1,10 @@
 use crate::{
     bot::Bot,
     models::message::Message,
-    params::{callback_query_param::AnswerCallbackQueryParams, message_params::SendMessageParams},
+    params::{
+        callback_query_param::AnswerCallbackQueryParams,
+        message_params::{EditMessageTextParams, SendMessageParams},
+    },
     requests,
     responses::MethodResponse,
     TelegramError,
@@ -22,7 +25,17 @@ impl Bot {
         .await
     }
 
-    // async fn send_photo()
+    async fn edit_message(
+        &self,
+        params: &EditMessageTextParams,
+    ) -> Result<MethodResponse<Message>, TelegramError> {
+        requests::post_request::<EditMessageTextParams, Message>(
+            "editMessageText",
+            self.token(),
+            Some(params),
+        )
+        .await
+    }
 
     pub async fn answer_callback_query(
         &self,
