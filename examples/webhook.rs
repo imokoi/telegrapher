@@ -1,6 +1,6 @@
 use core::{
     bot::Bot,
-    models::{message::Message, update::UpdateContent},
+    models::{chat, message::Message, update::UpdateContent},
     params::{message_params::SendMessageParamsBuilder, webhook_param::SetWebhookParamsBuilder},
     responses::build_webhook_response,
     BotCommands, JsonData, TelegrapherResult,
@@ -55,13 +55,15 @@ async fn command_handler(
 
 #[event_handler]
 async fn update_handler(bot: Bot, update: UpdateContent) -> TelegrapherResult<Option<JsonData>> {
+    println!("{:?}", update);
     let method = "sendMessage";
     let params = SendMessageParamsBuilder::default()
         .text("Hello")
-        .chat_id(1393242628)
+        .chat_id(-1002001406444 as i64)
+        .message_thread_id(3)
         .build()
         .unwrap();
-    bot.send_message_with_queue(true, &params).await;
+    bot.send_message_with_queue(&params).await;
     match build_webhook_response(method, params) {
         Ok(json) => Ok(Some(json)),
         Err(e) => Err(e),

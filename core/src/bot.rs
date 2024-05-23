@@ -15,11 +15,7 @@ use axum::{response::IntoResponse, Extension};
 use axum::{Json, Router};
 use reqwest::StatusCode;
 use serde_json::json;
-use std::{
-    borrow::BorrowMut,
-    fmt::Debug,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -29,10 +25,6 @@ pub struct Bot {
     pub token: String,
     pub handler: EventHandler,
     pub rate_limiter: Arc<RateLimiter>,
-    // pub message_channel: Arc<(
-    //     mpsc::Sender<SendMessageParams>,
-    //     mpsc::Receiver<SendMessageParams>,
-    // )>,
     pub message_sender: Arc<Option<mpsc::Sender<SendMessageParams>>>,
 }
 
@@ -107,14 +99,39 @@ impl Bot {
     pub async fn start_webhook(&mut self, addr: &str) -> Result<(), TelegrapherError> {
         // Start message sender
         let (sender, mut receiver) = mpsc::channel(2048);
+        let (sleep_sender, mut sleep_receiver) = mpsc::channel::<u64>(64);
         self.set_message_sender(sender);
         let bot = self.clone();
         tokio::spawn(async move {
             while let Some(params) = receiver.recv().await {
                 let bot = bot.clone();
+                let sleep_sender = sleep_sender.clone();
                 tokio::spawn(async move {
-                    let _ = bot.send_message(true, &params).await;
+                    match bot.send_message(&params).await {
+                        Ok(response) => {
+                            if !response.ok {
+                                let parameter = response.parameters;
+                                if parameter.is_none() {
+                                    return;
+                                }
+                                let parameter = parameter.unwrap();
+                                if parameter.retry_after.is_none() {
+                                    return;
+                                }
+
+                                let retry_after = parameter.retry_after.unwrap();
+                                _ = sleep_sender.send(retry_after).await;
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("{}", e);
+                        }
+                    }
                 });
+
+                if let Ok(retry_after) = sleep_receiver.try_recv() {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(retry_after + 1)).await;
+                }
             }
         });
 

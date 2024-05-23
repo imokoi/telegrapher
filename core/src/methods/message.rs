@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{arch::global_asm, time::Duration};
 
 use crate::{
     bot::Bot,
@@ -13,7 +13,7 @@ use crate::{
 };
 
 impl Bot {
-    pub async fn send_message_with_queue(&self, is_user_chat: bool, params: &SendMessageParams) {
+    pub async fn send_message_with_queue(&self, params: &SendMessageParams) {
         let message_sender = self.message_sender.clone();
         if let Some(sender) = message_sender.as_ref() {
             sender.send(params.clone()).await.unwrap();
@@ -24,47 +24,50 @@ impl Bot {
     /// [The official docs](https://core.telegram.org/bots/api#sendmessage)
     pub async fn send_message(
         &self,
-        is_user_chat: bool,
         params: &SendMessageParams,
     ) -> Result<MethodResponse<Message>, TelegrapherError> {
         let result;
-        if is_user_chat {
+        if params.chat_id > 0 {
             let rate_limiter = self.rate_limiter.clone();
             let user_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
-            let user_chat_permit = user_chat_sem.acquire().await.unwrap();
+            let user_chat_permit = user_chat_sem.acquire_owned().await.unwrap();
 
             let global_chat_sem = rate_limiter.acquire_global().await;
-            let global_chat_permit = global_chat_sem.acquire().await.unwrap();
+            let global_chat_permit = global_chat_sem.acquire_owned().await.unwrap();
             result = requests::post_request::<SendMessageParams, Message>(
                 "sendMessage",
                 self.token(),
                 Some(params),
             )
             .await;
-            tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
-            drop(global_chat_permit);
-            tokio::time::sleep(Duration::from_secs(1)).await;
-            drop(user_chat_permit);
-        } else {
-            let group_chat_sem = self
-                .rate_limiter
-                .clone()
-                .acquire_user_chat(params.chat_id)
-                .await;
-            let group_chat_permit = group_chat_sem.acquire().await.unwrap();
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
+                drop(global_chat_permit);
 
-            let global_chat_sem = self.rate_limiter.clone().acquire_global().await;
-            let global_chat_permit = global_chat_sem.acquire().await.unwrap();
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                drop(user_chat_permit);
+            });
+        } else {
+            let rate_limiter = self.rate_limiter.clone();
+            let group_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
+            let group_chat_permit = group_chat_sem.acquire_owned().await.unwrap();
+
+            let global_chat_sem = rate_limiter.acquire_global().await.clone();
+            let global_chat_permit = global_chat_sem.acquire_owned().await.unwrap();
             result = requests::post_request::<SendMessageParams, Message>(
                 "sendMessage",
                 self.token(),
                 Some(params),
             )
             .await;
-            tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
-            drop(global_chat_permit);
-            tokio::time::sleep(Duration::from_secs(60 / 20)).await;
-            drop(group_chat_permit);
+
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
+                drop(global_chat_permit);
+
+                tokio::time::sleep(Duration::from_secs(60 / 20)).await;
+                drop(group_chat_permit);
+            });
         }
         result
     }
@@ -143,7 +146,7 @@ mod tests {
             .build()
             .unwrap();
 
-        let message = bot.send_message(true, &params).await.unwrap();
+        let message = bot.send_message(&params).await.unwrap();
         println!("{:?}", message);
     }
 }

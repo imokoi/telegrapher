@@ -14,7 +14,7 @@ pub struct MethodResponse<T> {
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct ResponseParameters {
     pub migrate_to_chat_id: Option<i64>,
-    pub retry_after: Option<u16>,
+    pub retry_after: Option<u64>,
 }
 
 pub fn build_webhook_response<T: Serialize>(

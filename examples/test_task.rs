@@ -32,7 +32,7 @@ async fn request_api(bot: &Bot, chat_id: i32) {
         .build()
         .unwrap();
 
-    bot.send_message(true, &params).await;
+    bot.send_message(&params).await;
     // let sem = rate_limiter.acquire_user_chat(chat_id).await;
     // let permit = sem.acquire().await.unwrap();
     // println!("{}, Requesting API", chat_id);
