@@ -22,3 +22,4 @@ derive_builder = "0.20.0"
 async-std = "1.10.0"
 axum = "0.7"
 tower-http = { version = "^0.5.2", features = ["cors"] }
+futures = "0.3"

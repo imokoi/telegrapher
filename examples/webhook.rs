@@ -61,6 +61,7 @@ async fn update_handler(bot: Bot, update: UpdateContent) -> TelegrapherResult<Op
         .chat_id(1393242628)
         .build()
         .unwrap();
+    bot.send_message_with_queue(true, &params).await;
     match build_webhook_response(method, params) {
         Ok(json) => Ok(Some(json)),
         Err(e) => Err(e),

@@ -3,9 +3,9 @@ use crate::{
         allowed_update::AllowedUpdate,
         update::{Update, UpdateContent},
     },
-    params::updates_params::GetUpdatesParamsBuilder,
-    BotCommands, CommandHandler, EventHandler, JsonData, TelegrapherError, TelegrapherResult,
-    UpdateHandler,
+    params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder},
+    BotCommands, CommandHandler, EventHandler, JsonData, RateLimiter, TelegrapherError,
+    TelegrapherResult, UpdateHandler,
 };
 use axum::{
     extract::State,
@@ -16,16 +16,24 @@ use axum::{Json, Router};
 use reqwest::StatusCode;
 use serde_json::json;
 use std::{
+    borrow::BorrowMut,
     fmt::Debug,
     sync::{Arc, Mutex},
 };
+use tokio::sync::mpsc;
 use tower_http::cors::{Any, CorsLayer};
 
 #[must_use]
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Bot {
-    token: String,
-    handler: EventHandler,
+    pub token: String,
+    pub handler: EventHandler,
+    pub rate_limiter: Arc<RateLimiter>,
+    // pub message_channel: Arc<(
+    //     mpsc::Sender<SendMessageParams>,
+    //     mpsc::Receiver<SendMessageParams>,
+    // )>,
+    pub message_sender: Arc<Option<mpsc::Sender<SendMessageParams>>>,
 }
 
 impl Bot {
@@ -34,7 +42,13 @@ impl Bot {
         Self {
             token,
             handler: EventHandler::default(),
+            rate_limiter: Arc::new(RateLimiter::new()),
+            message_sender: Arc::new(None),
         }
+    }
+
+    fn set_message_sender(&mut self, sender: mpsc::Sender<SendMessageParams>) {
+        self.message_sender = Arc::new(Some(sender));
     }
 
     pub fn token(&self) -> &str {
@@ -90,7 +104,20 @@ impl Bot {
     }
 
     /// Start getting updates with Webhook.
-    pub async fn start_webhook(&self, addr: &str) -> Result<(), TelegrapherError> {
+    pub async fn start_webhook(&mut self, addr: &str) -> Result<(), TelegrapherError> {
+        // Start message sender
+        let (sender, mut receiver) = mpsc::channel(2048);
+        self.set_message_sender(sender);
+        let bot = self.clone();
+        tokio::spawn(async move {
+            while let Some(params) = receiver.recv().await {
+                let bot = bot.clone();
+                tokio::spawn(async move {
+                    let _ = bot.send_message(true, &params).await;
+                });
+            }
+        });
+
         let app = self.new_router();
         let listener = tokio::net::TcpListener::bind(addr).await?;
         let addr = listener.local_addr().expect("failed to get local addr");
