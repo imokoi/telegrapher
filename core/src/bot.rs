@@ -1,14 +1,25 @@
-use std::{fmt::Debug, sync::Arc, time::Duration};
-
-use reqwest::Client;
-use serde::de::DeserializeOwned;
-
 use crate::{
-    models::{allowed_update::AllowedUpdate, update::UpdateContent},
+    models::{
+        allowed_update::AllowedUpdate,
+        update::{Update, UpdateContent},
+    },
     params::updates_params::GetUpdatesParamsBuilder,
-    responses::MethodResponse,
-    BotCommands, CommandHandler, EventHandler, TelegramError, UpdateHandler,
+    BotCommands, CommandHandler, EventHandler, JsonData, TelegrapherError, TelegrapherResult,
+    UpdateHandler,
 };
+use axum::{
+    extract::State,
+    routing::{get, post},
+};
+use axum::{response::IntoResponse, Extension};
+use axum::{Json, Router};
+use reqwest::StatusCode;
+use serde_json::json;
+use std::{
+    fmt::Debug,
+    sync::{Arc, Mutex},
+};
+use tower_http::cors::{Any, CorsLayer};
 
 #[must_use]
 #[derive(Debug, Clone)]
@@ -39,7 +50,7 @@ impl Bot {
     }
 
     /// Start getting updates from telegram api server.
-    pub async fn start(&self) -> Result<(), TelegramError> {
+    pub async fn start(&self) -> Result<(), TelegrapherError> {
         let mut offset = None;
         loop {
             let params = GetUpdatesParamsBuilder::default()
@@ -78,7 +89,51 @@ impl Bot {
         }
     }
 
-    async fn process_update(&self, content: &UpdateContent) {
+    /// Start getting updates with Webhook.
+    pub async fn start_webhook(&self, addr: &str) -> Result<(), TelegrapherError> {
+        let app = self.new_router();
+        let listener = tokio::net::TcpListener::bind(addr).await?;
+        let addr = listener.local_addr().expect("failed to get local addr");
+        println!("Webhook is running on {}", addr);
+        match axum::serve(listener, app).await {
+            Ok(_) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+}
+
+impl Bot {
+    fn new_router(&self) -> Router {
+        let router = Router::new()
+            .route("/ping", get(Self::ping))
+            .route("/webhook", post(Self::webhook_update))
+            .layer(
+                CorsLayer::new()
+                    .allow_origin(Any)
+                    .allow_methods(Any)
+                    .allow_headers(Any),
+            )
+            .layer(Extension(self.clone()));
+        return router;
+    }
+
+    async fn ping() -> &'static str {
+        "pong"
+    }
+
+    async fn webhook_update(
+        Extension(bot): Extension<Bot>,
+        Json(update): Json<Update>,
+    ) -> impl IntoResponse {
+        if let Ok(json_data) = bot.process_update(&update.content).await {
+            if let Some(data) = json_data {
+                return Json(data);
+            }
+        }
+        return Json(json!({}));
+    }
+
+    async fn process_update(&self, content: &UpdateContent) -> TelegrapherResult<Option<JsonData>> {
         match content {
             UpdateContent::Message(message) => {
                 // if the content of message is a command
@@ -87,23 +142,22 @@ impl Bot {
                         let command = text.split_whitespace().next().unwrap();
                         if self.handler.commands.contains(&command.to_string()) {
                             if let Some(handler) = self.handler.command_handler {
-                                _ = handler(self.clone(), message.clone(), command.to_string())
+                                return handler(self.clone(), message.clone(), command.to_string())
                                     .await;
-                                return;
                             }
                         }
                     }
                 }
-
                 if let Some(handler) = self.handler.update_handler {
-                    _ = handler(self.clone(), content.clone()).await;
+                    return handler(self.clone(), content.clone()).await;
                 }
             }
             _ => {
                 if let Some(handler) = self.handler.update_handler {
-                    _ = handler(self.clone(), content.clone()).await;
+                    return handler(self.clone(), content.clone()).await;
                 }
             }
         }
+        return Ok(None);
     }
 }

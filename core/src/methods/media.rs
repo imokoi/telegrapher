@@ -10,14 +10,14 @@ use crate::{
     params::media_params::SendPhotoParams,
     requests,
     responses::MethodResponse,
-    TelegramError,
+    TelegrapherError,
 };
 
 impl Bot {
     pub async fn send_photo(
         &self,
         params: &SendPhotoParams,
-    ) -> Result<MethodResponse<Message>, TelegramError> {
+    ) -> Result<MethodResponse<Message>, TelegrapherError> {
         if let FileUpload::String(_) = &params.photo {
             return requests::post_request::<SendPhotoParams, Message>(
                 "sendPhoto",
@@ -29,7 +29,7 @@ impl Bot {
 
         let input_file = match &params.photo {
             FileUpload::InputFile(path) => path,
-            _ => return Err(TelegramError::from("Invalid file path")),
+            _ => return Err(TelegrapherError::from("Invalid file path")),
         };
         requests::post_multi_part_request::<SendPhotoParams, Message>(
             "sendPhoto",

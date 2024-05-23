@@ -4,14 +4,14 @@ use crate::{
     params::command_params::{DeleteMyCommandsParams, GetMyCommandsParams, SetMyCommandsParams},
     requests,
     responses::MethodResponse,
-    TelegramError,
+    TelegrapherError,
 };
 
 impl Bot {
     pub async fn set_my_commands(
         &self,
         params: &SetMyCommandsParams,
-    ) -> Result<MethodResponse<bool>, TelegramError> {
+    ) -> Result<MethodResponse<bool>, TelegrapherError> {
         requests::post_request::<SetMyCommandsParams, bool>(
             "setMyCommands",
             self.token(),
@@ -23,7 +23,7 @@ impl Bot {
     pub async fn delete_my_commands(
         &self,
         params: &DeleteMyCommandsParams,
-    ) -> Result<MethodResponse<bool>, TelegramError> {
+    ) -> Result<MethodResponse<bool>, TelegrapherError> {
         requests::post_request::<DeleteMyCommandsParams, bool>(
             "deleteMyCommands",
             self.token(),
@@ -35,7 +35,7 @@ impl Bot {
     pub async fn get_my_commands(
         &self,
         params: &GetMyCommandsParams,
-    ) -> Result<MethodResponse<Vec<BotCommand>>, TelegramError> {
+    ) -> Result<MethodResponse<Vec<BotCommand>>, TelegrapherError> {
         requests::post_request::<GetMyCommandsParams, Vec<BotCommand>>(
             "getMyCommands",
             self.token(),

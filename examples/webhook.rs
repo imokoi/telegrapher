@@ -1,31 +1,30 @@
 use core::{
     bot::Bot,
     models::{message::Message, update::UpdateContent},
+    params::{message_params::SendMessageParamsBuilder, webhook_param::SetWebhookParamsBuilder},
+    responses::build_webhook_response,
     BotCommands, JsonData, TelegrapherResult,
 };
-use macros::{event_handler, BotCommands};
+use macros::event_handler;
+use macros::BotCommands;
 use std::{future::Future, pin::Pin};
 
 #[tokio::main]
 async fn main() {
     let mut bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
-    // bot.register_commands(BotCommand, handler);
+    let set_webhook_params = SetWebhookParamsBuilder::default()
+        .url("https://namidev.com/webhook")
+        .build()
+        .unwrap();
+    let result = bot.set_webhook(&set_webhook_params).await;
+    println!("{:?}", result);
 
-    let commands = Commands::HelpMessage;
-    let command = commands.command_name();
-    println!("{}", command);
-
-    let names = Commands::to_name_vec();
-    println!("{:?}", names);
-
-    let str = "/help_message";
-    let cmd = Commands::try_from(str);
-    println!("{:?}", cmd);
+    let webhook_info = bot.get_webhook_info().await;
+    println!("{:?}", webhook_info);
 
     bot.register_commands_handler::<Commands>(command_handler);
     bot.register_update_handler(update_handler);
-
-    bot.start().await.unwrap();
+    bot.start_webhook("0.0.0.0:80").await.unwrap();
 }
 
 #[derive(BotCommands, Debug)]
@@ -56,6 +55,14 @@ async fn command_handler(
 
 #[event_handler]
 async fn update_handler(bot: Bot, update: UpdateContent) -> TelegrapherResult<Option<JsonData>> {
-    println!("Update handler");
-    Ok(Option::None)
+    let method = "sendMessage";
+    let params = SendMessageParamsBuilder::default()
+        .text("Hello")
+        .chat_id(1393242628)
+        .build()
+        .unwrap();
+    match build_webhook_response(method, params) {
+        Ok(json) => Ok(Some(json)),
+        Err(e) => Err(e),
+    }
 }

@@ -1,19 +1,15 @@
-use crate::{responses::MethodResponse, TelegramError, TELEGRAM_API_URL};
+use crate::{responses::MethodResponse, TelegrapherError, TELEGRAM_API_URL};
 use reqwest::multipart::{self, Part};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use std::{
-    fmt::Debug,
-    path::{Display, PathBuf},
-    time::Duration,
-};
+use std::{fmt::Debug, path::PathBuf, time::Duration};
 
 /// post a normal http request to the telegram api
 pub async fn post_request<P, T>(
     method: &str,
     token: &str,
     params: Option<&P>,
-) -> Result<MethodResponse<T>, TelegramError>
+) -> Result<MethodResponse<T>, TelegrapherError>
 where
     P: serde::ser::Serialize + std::fmt::Debug + std::marker::Send,
     T: DeserializeOwned + Debug,
@@ -50,7 +46,7 @@ pub async fn post_multi_part_request<P, T>(
     params: Option<&P>,
     file_path: &PathBuf,
     file_type: &FileType,
-) -> Result<MethodResponse<T>, TelegramError>
+) -> Result<MethodResponse<T>, TelegrapherError>
 where
     P: serde::ser::Serialize + std::fmt::Debug + std::marker::Send,
     T: DeserializeOwned + Debug,
@@ -67,10 +63,10 @@ where
     let json_string = encode_params(&params)?;
     let json_struct: Value = serde_json::from_str(&json_string).unwrap();
     let filename = file_path.file_name().ok_or_else(|| {
-        TelegramError::from("file path is not valid. please provide a valid path.")
+        TelegrapherError::from("file path is not valid. please provide a valid path.")
     })?;
     let filename_str = filename.to_str().ok_or_else(|| {
-        TelegramError::from("file path is not valid. Please provide a valid path.")
+        TelegrapherError::from("file path is not valid. Please provide a valid path.")
     })?;
     let mut form = multipart::Form::new();
     for (key, val) in json_struct.as_object().unwrap() {
@@ -101,8 +97,8 @@ where
 
 pub fn encode_params<T: serde::ser::Serialize + std::fmt::Debug>(
     params: &T,
-) -> Result<String, TelegramError> {
-    serde_json::to_string(params).map_err(|e| TelegramError::from(e))
+) -> Result<String, TelegrapherError> {
+    serde_json::to_string(params).map_err(|e| TelegrapherError::from(e))
 }
 
 #[derive(Debug, Clone)]

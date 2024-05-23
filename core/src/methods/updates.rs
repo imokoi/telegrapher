@@ -1,13 +1,13 @@
 use crate::params::updates_params::GetUpdatesParams;
 use crate::requests;
 use crate::responses::MethodResponse;
-use crate::{bot::Bot, models::update::Update, TelegramError};
+use crate::{bot::Bot, models::update::Update, TelegrapherError};
 
 impl Bot {
     pub async fn get_updates(
         &self,
         params: &GetUpdatesParams,
-    ) -> Result<MethodResponse<Vec<Update>>, TelegramError> {
+    ) -> Result<MethodResponse<Vec<Update>>, TelegrapherError> {
         requests::post_request::<GetUpdatesParams, Vec<Update>>(
             "getUpdates",
             self.token(),

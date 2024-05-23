@@ -1,10 +1,7 @@
 use bot::Bot;
 use models::{message::Message, update::UpdateContent};
-use once_cell::sync::OnceCell;
-use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
-use std::sync;
 
 pub mod bot;
 pub mod methods;
@@ -15,8 +12,9 @@ pub mod responses;
 
 pub const TELEGRAM_API_URL: &str = "https://api.telegram.org";
 
-pub type TelegramError = Box<dyn std::error::Error + Send + Sync>;
-pub type TelegramResult<T> = Result<T, TelegramError>;
+pub type TelegrapherError = Box<dyn std::error::Error + Send + Sync>;
+pub type TelegrapherResult<T> = Result<T, TelegrapherError>;
+pub type JsonData = serde_json::Value;
 
 pub trait BotCommands: Sized {
     fn command_name(&self) -> &'static str;
@@ -25,9 +23,17 @@ pub trait BotCommands: Sized {
 }
 
 type UpdateHandler =
-    fn(Bot, UpdateContent) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>>;
+    fn(
+        Bot,
+        UpdateContent,
+    ) -> Pin<Box<dyn Future<Output = TelegrapherResult<Option<JsonData>>> + Send>>;
+
 pub type CommandHandler =
-    fn(Bot, Message, String) -> Pin<Box<dyn Future<Output = TelegramResult<()>> + Send>>;
+    fn(
+        Bot,
+        Message,
+        String,
+    ) -> Pin<Box<dyn Future<Output = TelegrapherResult<Option<JsonData>>> + Send>>;
 
 #[derive(Debug, Default, Clone)]
 pub struct EventHandler {

@@ -7,7 +7,7 @@ use crate::{
     },
     requests,
     responses::MethodResponse,
-    TelegramError,
+    TelegrapherError,
 };
 
 impl Bot {
@@ -16,7 +16,7 @@ impl Bot {
     pub async fn send_message(
         &self,
         params: &SendMessageParams,
-    ) -> Result<MethodResponse<Message>, TelegramError> {
+    ) -> Result<MethodResponse<Message>, TelegrapherError> {
         requests::post_request::<SendMessageParams, Message>(
             "sendMessage",
             self.token(),
@@ -28,7 +28,7 @@ impl Bot {
     pub async fn edit_message(
         &self,
         params: &EditMessageTextParams,
-    ) -> Result<MethodResponse<Message>, TelegramError> {
+    ) -> Result<MethodResponse<Message>, TelegrapherError> {
         requests::post_request::<EditMessageTextParams, Message>(
             "editMessageText",
             self.token(),
@@ -40,7 +40,7 @@ impl Bot {
     pub async fn delete_message(
         &self,
         params: &DeleteMessageParams,
-    ) -> Result<MethodResponse<bool>, TelegramError> {
+    ) -> Result<MethodResponse<bool>, TelegrapherError> {
         requests::post_request::<DeleteMessageParams, bool>(
             "deleteMessage",
             self.token(),
@@ -52,7 +52,7 @@ impl Bot {
     pub async fn answer_callback_query(
         &self,
         params: &AnswerCallbackQueryParams,
-    ) -> Result<MethodResponse<bool>, TelegramError> {
+    ) -> Result<MethodResponse<bool>, TelegrapherError> {
         requests::post_request::<AnswerCallbackQueryParams, bool>(
             "answerCallbackQuery",
             self.token(),
@@ -91,7 +91,6 @@ mod tests {
             inline_keyboard: vec![inline_keyboards],
         };
         let inline_keyboards = ReplyMarkup::InlineKeyboardMarkup(inline_keyboards_markup);
-
         let params = SendMessageParamsBuilder::default()
             .chat_id(1393242628)
             .text(raw_str.to_string())
