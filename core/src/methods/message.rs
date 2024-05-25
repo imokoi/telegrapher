@@ -34,19 +34,21 @@ impl Bot {
 
             let global_chat_sem = rate_limiter.acquire_global().await;
             let global_chat_permit = global_chat_sem.acquire_owned().await.unwrap();
+
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(1000 / 100)).await;
+                drop(global_chat_permit);
+
+                tokio::time::sleep(Duration::from_secs_f32(0.5)).await;
+                drop(user_chat_permit);
+            });
+
             result = requests::post_request::<SendMessageParams, Message>(
                 "sendMessage",
                 self.token(),
                 Some(params),
             )
             .await;
-            tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
-                drop(global_chat_permit);
-
-                tokio::time::sleep(Duration::from_secs(1)).await;
-                drop(user_chat_permit);
-            });
         } else {
             let rate_limiter = self.rate_limiter.clone();
             let group_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
@@ -54,20 +56,21 @@ impl Bot {
 
             let global_chat_sem = rate_limiter.acquire_global().await.clone();
             let global_chat_permit = global_chat_sem.acquire_owned().await.unwrap();
+
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(1000 / 100)).await;
+                drop(global_chat_permit);
+
+                tokio::time::sleep(Duration::from_secs(60 / 20)).await;
+                drop(group_chat_permit);
+            });
+
             result = requests::post_request::<SendMessageParams, Message>(
                 "sendMessage",
                 self.token(),
                 Some(params),
             )
             .await;
-
-            tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
-                drop(global_chat_permit);
-
-                tokio::time::sleep(Duration::from_secs(60 / 20)).await;
-                drop(group_chat_permit);
-            });
         }
         result
     }

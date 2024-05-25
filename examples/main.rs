@@ -37,8 +37,8 @@ pub enum Commands {
 
 #[event_handler]
 async fn command_handler(
-    bot: Bot,
-    msg: Message,
+    _bot: Bot,
+    _msg: Message,
     cmd: String,
 ) -> TelegrapherResult<Option<JsonData>> {
     let command = Commands::try_from(cmd.as_str())?;
@@ -55,7 +55,7 @@ async fn command_handler(
 }
 
 #[event_handler]
-async fn update_handler(bot: Bot, update: UpdateContent) -> TelegrapherResult<Option<JsonData>> {
+async fn update_handler(_bot: Bot, _update: UpdateContent) -> TelegrapherResult<Option<JsonData>> {
     println!("Update handler");
     Ok(Option::None)
 }

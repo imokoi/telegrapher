@@ -1,8 +1,7 @@
 use core::{
     bot::Bot,
-    models::{chat, message::Message, update::UpdateContent},
+    models::{message::Message, update::UpdateContent},
     params::{message_params::SendMessageParamsBuilder, webhook_param::SetWebhookParamsBuilder},
-    responses::build_webhook_response,
     BotCommands, JsonData, TelegrapherResult,
 };
 use macros::event_handler;
@@ -24,6 +23,7 @@ async fn main() {
 
     bot.register_commands_handler::<Commands>(command_handler);
     bot.register_update_handler(update_handler);
+    bot.start_message_send_queue().await;
     bot.start_webhook("0.0.0.0:80").await.unwrap();
 }
 
@@ -36,8 +36,8 @@ pub enum Commands {
 
 #[event_handler]
 async fn command_handler(
-    bot: Bot,
-    msg: Message,
+    _bot: Bot,
+    _msg: Message,
     cmd: String,
 ) -> TelegrapherResult<Option<JsonData>> {
     let command = Commands::try_from(cmd.as_str())?;
@@ -56,16 +56,16 @@ async fn command_handler(
 #[event_handler]
 async fn update_handler(bot: Bot, update: UpdateContent) -> TelegrapherResult<Option<JsonData>> {
     println!("{:?}", update);
-    let method = "sendMessage";
+    let _method = "sendMessage";
     let params = SendMessageParamsBuilder::default()
         .text("Hello")
-        .chat_id(-1002001406444 as i64)
-        .message_thread_id(3)
+        .chat_id(1393242628)
         .build()
         .unwrap();
     bot.send_message_with_queue(&params).await;
-    match build_webhook_response(method, params) {
-        Ok(json) => Ok(Some(json)),
-        Err(e) => Err(e),
-    }
+    // match build_webhook_response(method, params) {
+    //     Ok(json) => Ok(Some(json)),
+    //     Err(e) => Err(e),
+    // }
+    Ok(Option::None)
 }

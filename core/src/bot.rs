@@ -7,22 +7,18 @@ use crate::{
     BotCommands, CommandHandler, EventHandler, JsonData, RateLimiter, TelegrapherError,
     TelegrapherResult, UpdateHandler,
 };
-use axum::{
-    extract::State,
-    routing::{get, post},
-};
+use axum::routing::{get, post};
 use axum::{response::IntoResponse, Extension};
 use axum::{Json, Router};
-use reqwest::StatusCode;
 use serde_json::json;
-use std::sync::{Arc, Mutex};
-use tokio::sync::mpsc;
+use std::sync::Arc;
+use tokio::sync::{mpsc, Mutex};
 use tower_http::cors::{Any, CorsLayer};
 
 #[must_use]
 #[derive(Clone)]
 pub struct Bot {
-    pub token: String,
+    pub token: Arc<String>,
     pub handler: EventHandler,
     pub rate_limiter: Arc<RateLimiter>,
     pub message_sender: Arc<Option<mpsc::Sender<SendMessageParams>>>,
@@ -32,7 +28,7 @@ impl Bot {
     pub fn new(token: &str) -> Self {
         let token = token.to_string();
         Self {
-            token,
+            token: Arc::new(token),
             handler: EventHandler::default(),
             rate_limiter: Arc::new(RateLimiter::new()),
             message_sender: Arc::new(None),
@@ -95,18 +91,29 @@ impl Bot {
         }
     }
 
-    /// Start getting updates with Webhook.
-    pub async fn start_webhook(&mut self, addr: &str) -> Result<(), TelegrapherError> {
+    pub async fn start_message_send_queue(&mut self) {
         // Start message sender
         let (sender, mut receiver) = mpsc::channel(2048);
-        let (sleep_sender, mut sleep_receiver) = mpsc::channel::<u64>(64);
-        self.set_message_sender(sender);
-        let bot = self.clone();
+        self.set_message_sender(sender.clone());
+        let bot = Arc::new(self.clone());
+        let sleep_time = Arc::new(Mutex::new(0u64));
         tokio::spawn(async move {
             while let Some(params) = receiver.recv().await {
                 let bot = bot.clone();
-                let sleep_sender = sleep_sender.clone();
+                let message_sender = sender.clone();
+
+                let sleep_time_clone = sleep_time.clone();
+                {
+                    let sleep_time = sleep_time_clone.lock().await;
+                    println!("Sleeping for {} seconds", *sleep_time);
+                    tokio::time::sleep(tokio::time::Duration::from_secs(*sleep_time)).await;
+                }
+                {
+                    let mut sleep_time = sleep_time_clone.lock().await;
+                    *sleep_time = 0;
+                }
                 tokio::spawn(async move {
+                    println!("Sending message");
                     match bot.send_message(&params).await {
                         Ok(response) => {
                             if !response.ok {
@@ -120,21 +127,23 @@ impl Bot {
                                 }
 
                                 let retry_after = parameter.retry_after.unwrap();
-                                _ = sleep_sender.send(retry_after).await;
+                                let mut sleep_time = sleep_time_clone.lock().await;
+                                *sleep_time += retry_after;
+                                _ = message_sender.send(params.clone()).await;
                             }
                         }
                         Err(e) => {
                             eprintln!("{}", e);
+                            _ = message_sender.send(params.clone()).await;
                         }
                     }
                 });
-
-                if let Ok(retry_after) = sleep_receiver.try_recv() {
-                    tokio::time::sleep(tokio::time::Duration::from_secs(retry_after + 1)).await;
-                }
             }
         });
+    }
 
+    /// Start getting updates with Webhook.
+    pub async fn start_webhook(&mut self, addr: &str) -> Result<(), TelegrapherError> {
         let app = self.new_router();
         let listener = tokio::net::TcpListener::bind(addr).await?;
         let addr = listener.local_addr().expect("failed to get local addr");
