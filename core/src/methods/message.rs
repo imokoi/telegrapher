@@ -13,66 +13,72 @@ use crate::{
 };
 
 impl Bot {
-    pub async fn send_message_with_queue(&self, params: &SendMessageParams) {
-        let message_sender = self.message_sender.clone();
+    /// Send a message to the message channel. this method will retry with retry_after time automatically.
+    pub async fn send_message_throttled_and_retry(&self, params: &SendMessageParams) {
+        let message_sender;
+        {
+            message_sender = self.message_sender.lock().await;
+        }
         if let Some(sender) = message_sender.as_ref() {
-            sender.send(params.clone()).await.unwrap();
+            _ = sender.send(params.clone()).await;
         }
     }
 
-    /// Send a message to a chat.
+    /// Send a message to a chat. this method will send message slowly to avoid being banned by telegram.
     /// [The official docs](https://core.telegram.org/bots/api#sendmessage)
-    pub async fn send_message(
+    pub async fn send_message_throttled(
         &self,
         params: &SendMessageParams,
     ) -> Result<MethodResponse<Message>, TelegrapherError> {
-        let result;
         if params.chat_id > 0 {
             let rate_limiter = self.rate_limiter.clone();
             let user_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
-            let user_chat_permit = user_chat_sem.acquire_owned().await.unwrap();
+            let user_chat_permit = user_chat_sem.acquire_owned().await;
+            if user_chat_permit.is_err() {
+                return Err("User chat semaphore error".into());
+            }
 
             let global_chat_sem = rate_limiter.acquire_global().await;
-            let global_chat_permit = global_chat_sem.acquire_owned().await.unwrap();
+            let global_chat_permit = global_chat_sem.acquire_owned().await;
+            if global_chat_permit.is_err() {
+                return Err("Global chat semaphore error".into());
+            }
 
             tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000 / 100)).await;
+                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
                 drop(global_chat_permit);
 
-                tokio::time::sleep(Duration::from_secs_f32(0.5)).await;
+                tokio::time::sleep(Duration::from_secs_f32(1.0)).await;
                 drop(user_chat_permit);
             });
-
-            result = requests::post_request::<SendMessageParams, Message>(
-                "sendMessage",
-                self.token(),
-                Some(params),
-            )
-            .await;
         } else {
             let rate_limiter = self.rate_limiter.clone();
             let group_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
-            let group_chat_permit = group_chat_sem.acquire_owned().await.unwrap();
+            let group_chat_permit = group_chat_sem.acquire_owned().await;
+            if group_chat_permit.is_err() {
+                return Err("Group chat semaphore error".into());
+            }
 
             let global_chat_sem = rate_limiter.acquire_global().await.clone();
-            let global_chat_permit = global_chat_sem.acquire_owned().await.unwrap();
+            let global_chat_permit = global_chat_sem.acquire_owned().await;
+            if global_chat_permit.is_err() {
+                return Err("Global chat semaphore error".into());
+            }
 
             tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000 / 100)).await;
+                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
                 drop(global_chat_permit);
 
                 tokio::time::sleep(Duration::from_secs(60 / 20)).await;
                 drop(group_chat_permit);
             });
-
-            result = requests::post_request::<SendMessageParams, Message>(
-                "sendMessage",
-                self.token(),
-                Some(params),
-            )
-            .await;
         }
-        result
+        requests::post_request::<SendMessageParams, Message>(
+            "sendMessage",
+            self.token(),
+            Some(params),
+        )
+        .await
     }
 
     pub async fn edit_message(
@@ -149,7 +155,7 @@ mod tests {
             .build()
             .unwrap();
 
-        let message = bot.send_message(&params).await.unwrap();
+        let message = bot.send_message_throttled(&params).await.unwrap();
         println!("{:?}", message);
     }
 }

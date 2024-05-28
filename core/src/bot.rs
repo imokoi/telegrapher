@@ -7,11 +7,14 @@ use crate::{
     BotCommands, CommandHandler, EventHandler, JsonData, RateLimiter, TelegrapherError,
     TelegrapherResult, UpdateHandler,
 };
-use axum::routing::{get, post};
+use axum::{
+    handler,
+    routing::{get, post},
+};
 use axum::{response::IntoResponse, Extension};
 use axum::{Json, Router};
 use serde_json::json;
-use std::sync::Arc;
+use std::{borrow::BorrowMut, cell::RefCell, ops::DerefMut, sync::Arc};
 use tokio::sync::{mpsc, Mutex};
 use tower_http::cors::{Any, CorsLayer};
 
@@ -19,9 +22,9 @@ use tower_http::cors::{Any, CorsLayer};
 #[derive(Clone)]
 pub struct Bot {
     pub token: Arc<String>,
-    pub handler: EventHandler,
+    pub handler: Arc<Mutex<EventHandler>>,
     pub rate_limiter: Arc<RateLimiter>,
-    pub message_sender: Arc<Option<mpsc::Sender<SendMessageParams>>>,
+    pub message_sender: Arc<Mutex<Option<mpsc::Sender<SendMessageParams>>>>,
 }
 
 impl Bot {
@@ -29,26 +32,30 @@ impl Bot {
         let token = token.to_string();
         Self {
             token: Arc::new(token),
-            handler: EventHandler::default(),
+            handler: Arc::new(Mutex::new(EventHandler::default())),
             rate_limiter: Arc::new(RateLimiter::new()),
-            message_sender: Arc::new(None),
+            message_sender: Arc::new(Mutex::new(None)),
         }
     }
 
-    fn set_message_sender(&mut self, sender: mpsc::Sender<SendMessageParams>) {
-        self.message_sender = Arc::new(Some(sender));
+    async fn set_message_sender(&self, sender: mpsc::Sender<SendMessageParams>) {
+        let mut message_sender = self.message_sender.lock().await;
+        *message_sender = Some(sender);
     }
 
     pub fn token(&self) -> &str {
         &self.token
     }
 
-    pub fn register_update_handler(&mut self, handler: UpdateHandler) {
-        self.handler.register_update_handler(handler);
+    pub async fn register_update_handler(&self, handler: UpdateHandler) {
+        self.handler.lock().await.register_update_handler(handler);
     }
 
-    pub fn register_commands_handler<T: BotCommands>(&mut self, handler: CommandHandler) {
-        self.handler.register_command_handler::<T>(handler);
+    pub async fn register_commands_handler<T: BotCommands>(&self, handler: CommandHandler) {
+        self.handler
+            .lock()
+            .await
+            .register_command_handler::<T>(handler);
     }
 
     /// Start getting updates from telegram api server.
@@ -91,59 +98,13 @@ impl Bot {
         }
     }
 
-    pub async fn start_message_send_queue(&mut self) {
-        // Start message sender
-        let (sender, mut receiver) = mpsc::channel(2048);
-        self.set_message_sender(sender.clone());
-        let bot = Arc::new(self.clone());
-        let sleep_time = Arc::new(Mutex::new(0u64));
-        tokio::spawn(async move {
-            while let Some(params) = receiver.recv().await {
-                let bot = bot.clone();
-                let message_sender = sender.clone();
-
-                let sleep_time_clone = sleep_time.clone();
-                {
-                    let sleep_time = sleep_time_clone.lock().await;
-                    println!("Sleeping for {} seconds", *sleep_time);
-                    tokio::time::sleep(tokio::time::Duration::from_secs(*sleep_time)).await;
-                }
-                {
-                    let mut sleep_time = sleep_time_clone.lock().await;
-                    *sleep_time = 0;
-                }
-                tokio::spawn(async move {
-                    println!("Sending message");
-                    match bot.send_message(&params).await {
-                        Ok(response) => {
-                            if !response.ok {
-                                let parameter = response.parameters;
-                                if parameter.is_none() {
-                                    return;
-                                }
-                                let parameter = parameter.unwrap();
-                                if parameter.retry_after.is_none() {
-                                    return;
-                                }
-
-                                let retry_after = parameter.retry_after.unwrap();
-                                let mut sleep_time = sleep_time_clone.lock().await;
-                                *sleep_time += retry_after;
-                                _ = message_sender.send(params.clone()).await;
-                            }
-                        }
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            _ = message_sender.send(params.clone()).await;
-                        }
-                    }
-                });
-            }
-        });
-    }
-
     /// Start getting updates with Webhook.
-    pub async fn start_webhook(&mut self, addr: &str) -> Result<(), TelegrapherError> {
+    pub async fn start_webhook(&self, addr: &str) -> Result<(), TelegrapherError> {
+        let bot = self.clone();
+        tokio::spawn(async move {
+            let _ = bot.start_message_channel_monitor().await;
+        });
+
         let app = self.new_router();
         let listener = tokio::net::TcpListener::bind(addr).await?;
         let addr = listener.local_addr().expect("failed to get local addr");
@@ -151,6 +112,52 @@ impl Bot {
         match axum::serve(listener, app).await {
             Ok(_) => Ok(()),
             Err(e) => Err(Box::new(e)),
+        }
+    }
+
+    /// Start a message channel monitor to send messages to telegram api server.
+    /// This method can catch retry_after parameter then wait for that time and resend the message.
+    pub async fn start_message_channel_monitor(&self) {
+        let (sender, mut receiver) = mpsc::channel(2048);
+        self.set_message_sender(sender.clone()).await;
+        let sleep_time = Arc::new(Mutex::new(0u64));
+        while let Some(params) = receiver.recv().await {
+            let sleep_time_clone = sleep_time.clone();
+            {
+                let sleep_time = sleep_time_clone.lock().await;
+                println!("Sleeping for {} seconds", *sleep_time);
+                if *sleep_time > 0 {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(*sleep_time)).await;
+                }
+            }
+            {
+                let mut sleep_time = sleep_time_clone.lock().await;
+                *sleep_time = 0;
+            }
+
+            let bot = self.clone();
+            let channel_sender = sender.clone();
+            tokio::spawn(async move {
+                match bot.send_message_throttled(&params).await {
+                    Ok(response) => {
+                        if !response.ok {
+                            if let Some(retry_after) =
+                                response.parameters.and_then(|p| p.retry_after)
+                            {
+                                {
+                                    let mut sleep_time = sleep_time_clone.lock().await;
+                                    *sleep_time += retry_after;
+                                }
+                                _ = channel_sender.send(params.clone()).await;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        _ = channel_sender.send(params.clone()).await;
+                    }
+                }
+            });
         }
     }
 }
@@ -187,26 +194,30 @@ impl Bot {
     }
 
     async fn process_update(&self, content: &UpdateContent) -> TelegrapherResult<Option<JsonData>> {
+        let handler;
+        {
+            handler = self.handler.lock().await;
+        }
         match content {
             UpdateContent::Message(message) => {
                 // if the content of message is a command
                 if let Some(text) = message.text.as_ref() {
                     if text.starts_with('/') {
                         let command = text.split_whitespace().next().unwrap();
-                        if self.handler.commands.contains(&command.to_string()) {
-                            if let Some(handler) = self.handler.command_handler {
+                        if handler.commands.contains(&command.to_string()) {
+                            if let Some(handler) = handler.command_handler {
                                 return handler(self.clone(), message.clone(), command.to_string())
                                     .await;
                             }
                         }
                     }
                 }
-                if let Some(handler) = self.handler.update_handler {
+                if let Some(handler) = handler.update_handler {
                     return handler(self.clone(), content.clone()).await;
                 }
             }
             _ => {
-                if let Some(handler) = self.handler.update_handler {
+                if let Some(handler) = handler.update_handler {
                     return handler(self.clone(), content.clone()).await;
                 }
             }
