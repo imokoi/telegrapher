@@ -2,9 +2,9 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{self, DataEnum, DeriveInput};
+use syn::{self, DataEnum, DeriveInput, Ident, Meta};
 
-#[proc_macro_derive(BotCommands)]
+#[proc_macro_derive(BotCommands, attributes(BotCommands))]
 pub fn bot_commands_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     impl_bot_commands(&ast).into()
@@ -14,14 +14,14 @@ fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
     let name = &input.ident;
     let data_enum = get_enum_data(&input);
 
-    let fn_command_name = impl_command_name(&data_enum);
-    let fn_to_name_vec = impl_to_name_vec(&data_enum);
+    let fn_as_str = impl_as_str(&data_enum);
+    let fn_vec = impl_vec(&name, &data_enum);
     let fn_try_into = impl_try_from(&data_enum);
 
     quote! {
         impl BotCommands for #name {
-            #fn_command_name
-            #fn_to_name_vec
+            #fn_as_str
+            #fn_vec
         }
 
         impl std::convert::TryFrom<&str> for #name {
@@ -32,17 +32,17 @@ fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
     }
 }
 
-fn impl_command_name(data_enum: &DataEnum) -> proc_macro2::TokenStream {
+fn impl_as_str(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
+        let cmd_name = format!("/{}", to_lower_case(&ident.to_string()));
         quote! {
             Commands::#ident => #cmd_name,
         }
     });
 
     quote! {
-        fn command_name(&self) -> &'static str {
+        fn as_str(&self) -> &'static str {
             match self {
                 #( #variant_names )*
             }
@@ -51,19 +51,23 @@ fn impl_command_name(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     .into()
 }
 
-fn impl_to_name_vec(data_enum: &DataEnum) -> proc_macro2::TokenStream {
-    let variant_names = data_enum.variants.iter().map(|v| {
-        let ident = &v.ident;
-        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
-        quote! {
-            #cmd_name,
+fn impl_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
+    let filtered_variants = data_enum.variants.iter().filter_map(|variant| {
+        let skip = variant.attrs.iter().any(|attr| {
+            attr.path().is_ident("BotCommands")
+                && attr.parse_args::<Ident>().unwrap().to_string() == "skip"
+        });
+        if skip {
+            None
+        } else {
+            Some(&variant.ident)
         }
     });
 
     quote! {
-        fn to_name_vec() -> Vec<&'static str> {
+        fn vec() -> Vec<Self> {
             vec![
-                #( #variant_names )*
+                 #(#name::#filtered_variants),*
             ]
         }
     }
@@ -73,8 +77,7 @@ fn impl_to_name_vec(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
-        println!("cmd_name: {}", cmd_name);
+        let cmd_name = format!("/{}", to_lower_case(&ident.to_string()));
         quote! {
             #cmd_name => Ok(Commands::#ident),
         }
@@ -95,7 +98,6 @@ fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 pub fn event_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn = syn::parse_macro_input!(item as syn::ItemFn);
 
-    // 获取函数名称
     let fn_name = &input_fn.sig.ident;
     let fn_body = &input_fn.block;
     let fn_inputs = &input_fn.sig.inputs;
@@ -123,13 +125,13 @@ fn get_enum_data(input: &DeriveInput) -> syn::DataEnum {
     }
 }
 
-fn to_snake_case(s: &str) -> String {
+fn to_lower_case(s: &str) -> String {
     let mut snake_case = String::new();
     for (i, c) in s.chars().enumerate() {
         if c.is_uppercase() {
-            if i != 0 {
-                snake_case.push('_');
-            }
+            // if i != 0 {
+            //     snake_case.push('_');
+            // }
             snake_case.push(c.to_ascii_lowercase());
         } else {
             snake_case.push(c);

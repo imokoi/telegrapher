@@ -23,9 +23,9 @@ pub type TelegrapherResult<T> = Result<T, TelegrapherError>;
 pub type JsonData = serde_json::Value;
 
 pub trait BotCommands: Sized {
-    fn command_name(&self) -> &'static str;
+    fn as_str(&self) -> &'static str;
 
-    fn to_name_vec() -> Vec<&'static str>;
+    fn vec() -> Vec<Self>;
 }
 
 type UpdateHandler =
@@ -54,8 +54,8 @@ impl EventHandler {
 
     pub fn register_command_handler<T: BotCommands>(&mut self, handler: CommandHandler) {
         self.command_handler = Some(handler);
-        for cmd in T::to_name_vec() {
-            self.commands.push(cmd.to_string());
+        for cmd in T::vec() {
+            self.commands.push(cmd.as_str().to_string());
         }
     }
 }

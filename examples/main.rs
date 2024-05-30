@@ -12,20 +12,23 @@ async fn main() {
     // bot.register_commands(BotCommand, handler);
 
     let commands = Commands::HelpMessage;
-    let command = commands.command_name();
+    let command = commands.as_str();
     println!("{}", command);
 
-    let names = Commands::to_name_vec();
-    println!("{:?}", names);
+    // let names = Commands::to_name_vec();
+    // println!("{:?}", names);
 
-    let str = "/help_message";
+    let str = "/helpmessage";
     let cmd = Commands::try_from(str);
     println!("{:?}", cmd);
 
-    bot.register_commands_handler::<Commands>(command_handler);
-    bot.register_update_handler(update_handler);
+    let commands = Commands::vec();
+    println!("{:?}", commands);
 
-    bot.start().await.unwrap();
+    // bot.register_commands_handler::<Commands>(command_handler);
+    // bot.register_update_handler(update_handler);
+
+    // bot.start().await.unwrap();
 }
 
 #[derive(BotCommands, Debug)]
@@ -34,6 +37,12 @@ pub enum Commands {
     Menu,
     About,
 }
+
+// impl Commands {
+//     pub fn iter() -> Vec<Self> {
+//         vec![Commands::HelpMessage, Commands::Menu, Commands::About]
+//     }
+// }
 
 #[event_handler]
 async fn command_handler(
