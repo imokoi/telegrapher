@@ -1,8 +1,7 @@
-use derive_builder::Builder;
-use serde::{Deserialize, Serialize};
-
 use crate::models::chat::ChatAdministratorRights;
 use crate::models::web_app::WebAppInfo;
+use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
 
 use super::{
     forum::CallbackGame,
@@ -47,68 +46,105 @@ pub struct InlineKeyboardButton {
     pub pay: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct ReplyKeyboardMarkup {
     pub keyboard: Vec<Vec<KeyboardButton>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_persistent: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub resize_keyboard: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_keyboard: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_field_placeholder: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub selective: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct KeyboardButton {
     pub text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_users: Option<KeyboardButtonRequestUsers>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_chat: Option<KeyboardButtonRequestChat>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_contact: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_location: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_poll: Option<KeyboardButtonPollType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub web_app: Option<WebAppInfo>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct KeyboardButtonRequestUsers {
     pub request_id: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_is_bot: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_is_premium: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub max_quantity: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_name: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_username: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_photo: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct KeyboardButtonRequestChat {
     pub request_id: i32,
     pub chat_is_channel: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_is_forum: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_has_username: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_is_created: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_administrator_rights: Option<ChatAdministratorRights>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bot_administrator_rights: Option<ChatAdministratorRights>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bot_is_member: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_title: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_username: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub request_photo: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct KeyboardButtonPollType {
     #[serde(rename = "type")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub type_field: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct ReplyKeyboardRemove {
     pub remove_keyboard: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub selective: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
+#[builder(setter(into), default)]
 pub struct ForceReply {
     pub force_reply: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_field_placeholder: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub selective: Option<bool>,
 }
