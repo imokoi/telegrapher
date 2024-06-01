@@ -200,7 +200,6 @@ impl Bot {
         }
         match content {
             UpdateContent::Message(message) => {
-                println!("Message: {:?}", message);
                 // if the content of message is a command
                 if let Some(text) = message.text.as_ref() {
                     if text.starts_with('/') {
