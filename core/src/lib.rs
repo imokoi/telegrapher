@@ -25,7 +25,7 @@ pub type JsonData = serde_json::Value;
 pub trait BotCommands: Sized {
     fn as_str(&self) -> &'static str;
 
-    fn vec() -> Vec<Self>;
+    fn to_vec(enable_skip: bool) -> Vec<Self>;
 }
 
 type UpdateHandler =
@@ -54,7 +54,7 @@ impl EventHandler {
 
     pub fn register_command_handler<T: BotCommands>(&mut self, handler: CommandHandler) {
         self.command_handler = Some(handler);
-        for cmd in T::vec() {
+        for cmd in T::to_vec(false) {
             self.commands.push(cmd.as_str().to_string());
         }
     }

@@ -22,7 +22,10 @@ async fn main() {
     let cmd = Commands::try_from(str);
     println!("{:?}", cmd);
 
-    let commands = Commands::vec();
+    let commands_with_skip = Commands::to_vec(false);
+    println!("{:?}", commands_with_skip);
+
+    let commands = Commands::to_vec(true);
     println!("{:?}", commands);
 
     // bot.register_commands_handler::<Commands>(command_handler);
@@ -36,6 +39,8 @@ pub enum Commands {
     HelpMessage,
     Menu,
     About,
+    #[BotCommands(skip)]
+    Language,
 }
 
 // impl Commands {
@@ -58,6 +63,9 @@ async fn command_handler(
         Commands::Menu => {}
         Commands::About => {
             println!("About command");
+        }
+        Commands::Language => {
+            println!("Language command");
         }
     };
     Ok(Option::None)

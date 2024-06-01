@@ -15,7 +15,7 @@ fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
     let data_enum = get_enum_data(&input);
 
     let fn_as_str = impl_as_str(&data_enum);
-    let fn_vec = impl_vec(&name, &data_enum);
+    let fn_vec = impl_to_vec(&name, &data_enum);
     let fn_try_into = impl_try_from(&data_enum);
 
     quote! {
@@ -51,8 +51,8 @@ fn impl_as_str(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     .into()
 }
 
-fn impl_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
-    let filtered_variants = data_enum.variants.iter().filter_map(|variant| {
+fn impl_to_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
+    let filtered_with_skip_variants = data_enum.variants.iter().filter_map(|variant| {
         let skip = variant.attrs.iter().any(|attr| {
             attr.path().is_ident("BotCommands")
                 && attr.parse_args::<Ident>().unwrap().to_string() == "skip"
@@ -63,9 +63,18 @@ fn impl_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
             Some(&variant.ident)
         }
     });
+    let filtered_variants = data_enum
+        .variants
+        .iter()
+        .filter_map(|variant| Some(&variant.ident));
 
     quote! {
-        fn vec() -> Vec<Self> {
+        fn to_vec(enable_skip: bool) -> Vec<Self> {
+            if enable_skip {
+                return vec![
+                    #(#name::#filtered_with_skip_variants),*
+                ];
+            }
             vec![
                  #(#name::#filtered_variants),*
             ]
