@@ -35,7 +35,7 @@ fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
 fn impl_as_str(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", to_lower_case(&ident.to_string()));
+        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
         quote! {
             Commands::#ident => #cmd_name,
         }
@@ -86,7 +86,7 @@ fn impl_to_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
 fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let variant_names = data_enum.variants.iter().map(|v| {
         let ident = &v.ident;
-        let cmd_name = format!("/{}", to_lower_case(&ident.to_string()));
+        let cmd_name = format!("/{}", to_snake_case(&ident.to_string()));
         quote! {
             #cmd_name => Ok(Commands::#ident),
         }
@@ -134,13 +134,13 @@ fn get_enum_data(input: &DeriveInput) -> syn::DataEnum {
     }
 }
 
-fn to_lower_case(s: &str) -> String {
+fn to_snake_case(s: &str) -> String {
     let mut snake_case = String::new();
     for (i, c) in s.chars().enumerate() {
         if c.is_uppercase() {
-            // if i != 0 {
-            //     snake_case.push('_');
-            // }
+            if i != 0 {
+                snake_case.push('_');
+            }
             snake_case.push(c.to_ascii_lowercase());
         } else {
             snake_case.push(c);
