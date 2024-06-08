@@ -121,19 +121,7 @@ impl Bot {
         let (sender, mut receiver) = mpsc::channel(2048);
         self.set_message_sender(sender.clone()).await;
         let sleep_time = Arc::new(Mutex::new(0u64));
-        println!("Starting message channel monitor");
-        // print memory address
-        println!(
-            "Memory address: {:p}",
-            &sender as *const mpsc::Sender<SendMessageParams>
-        );
-        println!(
-            "Memory address: {:p}",
-            &receiver as *const mpsc::Receiver<SendMessageParams>
-        );
-
         while let Some(params) = receiver.recv().await {
-            println!("Sending message: {:?}", params);
             let sleep_time_clone = sleep_time.clone();
             {
                 let sleep_time = sleep_time_clone.lock().await;
