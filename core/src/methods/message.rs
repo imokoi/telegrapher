@@ -19,6 +19,7 @@ impl Bot {
         {
             message_sender = self.message_sender.lock().await;
         }
+        println!("Sending message to channel");
         if let Some(sender) = message_sender.as_ref() {
             _ = sender.send(params.clone()).await;
         }

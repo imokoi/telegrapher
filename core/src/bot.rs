@@ -122,6 +122,7 @@ impl Bot {
         self.set_message_sender(sender.clone()).await;
         let sleep_time = Arc::new(Mutex::new(0u64));
         while let Some(params) = receiver.recv().await {
+            println!("Sending message: {:?}", params);
             let sleep_time_clone = sleep_time.clone();
             {
                 let sleep_time = sleep_time_clone.lock().await;
