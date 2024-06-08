@@ -23,6 +23,7 @@ impl Bot {
         if let Some(sender) = message_sender.as_ref() {
             _ = sender.send(params.clone()).await;
         }
+        println!("Message sent to channel");
     }
 
     /// Send a message to a chat. this method will send message slowly to avoid being banned by telegram.
