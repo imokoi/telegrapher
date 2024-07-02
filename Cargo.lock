@@ -325,6 +325,7 @@ dependencies = [
  "axum",
  "derive_builder",
  "futures",
+ "log",
  "reqwest",
  "serde",
  "serde_json",
@@ -1506,6 +1507,7 @@ name = "telegrapher"
 version = "0.1.0"
 dependencies = [
  "core",
+ "log",
  "macros",
  "serde",
  "tokio",

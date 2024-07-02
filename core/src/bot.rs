@@ -68,13 +68,13 @@ impl Bot {
                 .allowed_updates(vec![AllowedUpdate::Message, AllowedUpdate::CallbackQuery])
                 .build();
             if let Err(_) = params {
-                eprintln!("Failed to build GetUpdatesParams");
+                log::error!("failed to build params");
                 continue;
             }
             let params = params.unwrap();
             let response = self.get_updates(&params).await;
             if let Err(e) = response {
-                eprintln!("{}", e);
+                log::error!("failed to get updates: {:?}", e);
                 continue;
             }
 
@@ -92,7 +92,7 @@ impl Bot {
                     }
                 }
                 None => {
-                    eprintln!("No updates found: {:?}", updates_res.description);
+                    log::error!("No updates found: {:?}", updates_res.description);
                 }
             }
         }
@@ -108,7 +108,7 @@ impl Bot {
         let app = self.new_router();
         let listener = tokio::net::TcpListener::bind(addr).await?;
         let addr = listener.local_addr().expect("failed to get local addr");
-        println!("Webhook is running on {}", addr);
+        log::info!("Webhook is running on {}", addr);
         match axum::serve(listener, app).await {
             Ok(_) => Ok(()),
             Err(e) => Err(Box::new(e)),
@@ -125,7 +125,7 @@ impl Bot {
             let sleep_time_clone = sleep_time.clone();
             {
                 let sleep_time = sleep_time_clone.lock().await;
-                println!("Sleeping for {} seconds", *sleep_time);
+                log::debug!("Sleeping for {} seconds", *sleep_time);
                 if *sleep_time > 0 {
                     tokio::time::sleep(tokio::time::Duration::from_secs(*sleep_time)).await;
                 }
@@ -153,7 +153,7 @@ impl Bot {
                         }
                     }
                     Err(e) => {
-                        eprintln!("{}", e);
+                        log::error!("failed to send message: {:?}", e);
                         _ = channel_sender.send(params.clone()).await;
                     }
                 }

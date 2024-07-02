@@ -1,9 +1,3 @@
-use reqwest::{
-    multipart::{self, Part},
-    Client,
-};
-use serde_json::Value;
-
 use crate::{
     bot::Bot,
     models::{message::Message, sticker::FileUpload},
@@ -12,6 +6,7 @@ use crate::{
     responses::MethodResponse,
     TelegrapherError,
 };
+use crate::params::media_params::SendDocumentParams;
 
 impl Bot {
     pub async fn send_photo(
@@ -39,5 +34,30 @@ impl Bot {
             &requests::FileType::Photo,
         )
         .await
+    }
+
+    pub async fn send_document(
+        &self,
+        params: &SendDocumentParams,
+    ) -> Result<MethodResponse<Message>, TelegrapherError> {
+        if let FileUpload::String(_) = &params.document {
+            return requests::post_request::<SendDocumentParams, Message>(
+                "sendDocument",
+                self.token(),
+                Some(params),
+            ).await;
+        }
+
+        let input_file = match &params.document {
+            FileUpload::InputFile(path) => path,
+            _ => return Err(TelegrapherError::from("Invalid file path")),
+        };
+        requests::post_multi_part_request::<SendDocumentParams, Message>(
+            "sendDocument",
+            self.token(),
+            Some(params),
+            &input_file.path,
+            &requests::FileType::Document,
+        ).await
     }
 }

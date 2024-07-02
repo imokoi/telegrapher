@@ -3,6 +3,7 @@ use reqwest::multipart::{self, Part};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 use std::{fmt::Debug, path::PathBuf, time::Duration};
+use std::fmt::Display;
 
 /// post a normal http request to the telegram api
 pub async fn post_request<P, T>(
@@ -29,7 +30,7 @@ where
 
     prepared_request = if let Some(data) = params {
         let json_string = encode_params(&data)?;
-        println!("json string: {}", json_string);
+        log::debug!("send data json string: {}", json_string);
         prepared_request.body(json_string)
     } else {
         prepared_request
@@ -111,16 +112,17 @@ pub enum FileType {
     Animation,
 }
 
-impl ToString for FileType {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for FileType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             FileType::Photo => "photo".to_string(),
             FileType::Video => "video".to_string(),
             FileType::Document => "document".to_string(),
             FileType::Audio => "audio".to_string(),
             FileType::Voice => "voice".to_string(),
             FileType::Animation => "animation".to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }
 
