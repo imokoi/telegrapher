@@ -1,8 +1,9 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+
 use quote::quote;
-use syn::{self, DataEnum, DeriveInput, Ident, Meta};
+use syn::{self, DataEnum, DeriveInput, Ident};
 
 #[proc_macro_derive(BotCommands, attributes(BotCommands))]
 pub fn bot_commands_derive(input: TokenStream) -> TokenStream {
@@ -13,11 +14,9 @@ pub fn bot_commands_derive(input: TokenStream) -> TokenStream {
 fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
     let name = &input.ident;
     let data_enum = get_enum_data(&input);
-
     let fn_as_str = impl_as_str(&data_enum);
     let fn_vec = impl_to_vec(&name, &data_enum);
     let fn_try_into = impl_try_from(&data_enum);
-
     quote! {
         impl BotCommands for #name {
             #fn_as_str
@@ -48,7 +47,6 @@ fn impl_as_str(data_enum: &DataEnum) -> proc_macro2::TokenStream {
             }
         }
     }
-    .into()
 }
 
 fn impl_to_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
@@ -66,7 +64,7 @@ fn impl_to_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let filtered_variants = data_enum
         .variants
         .iter()
-        .filter_map(|variant| Some(&variant.ident));
+        .map(|variant| Some(&variant.ident));
 
     quote! {
         fn to_vec(enable_skip: bool) -> Vec<Self> {
@@ -80,7 +78,6 @@ fn impl_to_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
             ]
         }
     }
-    .into()
 }
 
 fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
@@ -100,7 +97,6 @@ fn impl_try_from(data_enum: &DataEnum) -> proc_macro2::TokenStream {
             }
         }
     }
-    .into()
 }
 
 #[proc_macro_attribute]

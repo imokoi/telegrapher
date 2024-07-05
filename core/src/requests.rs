@@ -1,9 +1,11 @@
-use crate::{responses::MethodResponse, TelegrapherError, TELEGRAM_API_URL};
+use std::{fmt::Debug, path::PathBuf, time::Duration};
+use std::fmt::Display;
+
 use reqwest::multipart::{self, Part};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use std::{fmt::Debug, path::PathBuf, time::Duration};
-use std::fmt::Display;
+
+use crate::{FileType, responses::MethodResponse, TELEGRAM_API_URL, TelegrapherError};
 
 /// post a normal http request to the telegram api
 pub async fn post_request<P, T>(
@@ -41,6 +43,7 @@ where
     Ok(response)
 }
 
+/// Post multi part request to the telegram api
 pub async fn post_multi_part_request<P, T>(
     method: &str,
     token: &str,
@@ -96,34 +99,11 @@ where
     Ok(response)
 }
 
-pub fn encode_params<T: serde::ser::Serialize + std::fmt::Debug>(
+/// Encode the params to json string
+pub fn encode_params<T: serde::ser::Serialize + Debug>(
     params: &T,
 ) -> Result<String, TelegrapherError> {
-    serde_json::to_string(params).map_err(|e| TelegrapherError::from(e))
-}
-
-#[derive(Debug, Clone)]
-pub enum FileType {
-    Photo,
-    Video,
-    Document,
-    Audio,
-    Voice,
-    Animation,
-}
-
-impl Display for FileType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
-            FileType::Photo => "photo".to_string(),
-            FileType::Video => "video".to_string(),
-            FileType::Document => "document".to_string(),
-            FileType::Audio => "audio".to_string(),
-            FileType::Voice => "voice".to_string(),
-            FileType::Animation => "animation".to_string(),
-        };
-        write!(f, "{}", str)
-    }
+    serde_json::to_string(params).map_err(TelegrapherError::from)
 }
 
 #[cfg(test)]

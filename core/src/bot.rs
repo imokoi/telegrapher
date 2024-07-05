@@ -1,22 +1,24 @@
-use crate::{
-    models::{
-        allowed_update::AllowedUpdate,
-        update::{Update, UpdateContent},
-    },
-    params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder},
-    BotCommands, CommandHandler, EventHandler, JsonData, RateLimiter, TelegrapherError,
-    TelegrapherResult, UpdateHandler,
-};
+use std::{borrow::BorrowMut, cell::RefCell, ops::DerefMut, sync::Arc};
+
 use axum::{
     handler,
     routing::{get, post},
 };
-use axum::{response::IntoResponse, Extension};
+use axum::{Extension, response::IntoResponse};
 use axum::{Json, Router};
 use serde_json::json;
-use std::{borrow::BorrowMut, cell::RefCell, ops::DerefMut, sync::Arc};
 use tokio::sync::{mpsc, Mutex};
 use tower_http::cors::{Any, CorsLayer};
+
+use crate::{
+    BotCommands,
+    CommandHandler,
+    EventHandler, JsonData, models::{
+        allowed_update::AllowedUpdate,
+        update::{Update, UpdateContent},
+    }, params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder}, RateLimiter, TelegrapherError,
+    TelegrapherResult, UpdateHandler,
+};
 
 #[must_use]
 #[derive(Clone)]
@@ -29,15 +31,16 @@ pub struct Bot {
 
 impl Bot {
     pub fn new(token: &str) -> Self {
-        let token = token.to_string();
         Self {
-            token: Arc::new(token),
+            token: Arc::new(token.to_string()),
             handler: Arc::new(Mutex::new(EventHandler::default())),
-            rate_limiter: Arc::new(RateLimiter::new()),
+            rate_limiter: Arc::new(RateLimiter::default()),
             message_sender: Arc::new(Mutex::new(None)),
         }
     }
 
+    /// set the message sender, this is a channel sender.
+    /// send message to the channel, then bot get message from channel and send it.
     async fn set_message_sender(&self, sender: mpsc::Sender<SendMessageParams>) {
         let mut message_sender = self.message_sender.lock().await;
         *message_sender = Some(sender);
@@ -47,10 +50,12 @@ impl Bot {
         &self.token
     }
 
+    /// register update handler function.
     pub async fn register_update_handler(&self, handler: UpdateHandler) {
         self.handler.lock().await.register_update_handler(handler);
     }
 
+    /// register command handler function.
     pub async fn register_commands_handler<T: BotCommands>(&self, handler: CommandHandler) {
         self.handler
             .lock()
@@ -92,7 +97,7 @@ impl Bot {
                     }
                 }
                 None => {
-                    log::error!("No updates found: {:?}", updates_res.description);
+                    log::error!("no updates found: {:?}", updates_res.description);
                 }
             }
         }
@@ -116,11 +121,13 @@ impl Bot {
     }
 
     /// Start a message channel monitor to send messages to telegram api server.
-    /// This method can catch retry_after parameter then wait for that time and resend the message.
+    /// This method can catch retry_after parameter then wait for that time then resend the message.
     pub async fn start_message_channel_monitor(&self) {
+        // create a channel with buffer.
         let (sender, mut receiver) = mpsc::channel(2048);
         self.set_message_sender(sender.clone()).await;
         let sleep_time = Arc::new(Mutex::new(0u64));
+        // get message from channel.
         while let Some(params) = receiver.recv().await {
             let sleep_time_clone = sleep_time.clone();
             {
@@ -140,16 +147,15 @@ impl Bot {
             tokio::spawn(async move {
                 match bot.send_message_throttled(&params).await {
                     Ok(response) => {
-                        if !response.ok {
-                            if let Some(retry_after) =
-                                response.parameters.and_then(|p| p.retry_after)
+                        if response.ok {
+                            return;
+                        }
+                        if let Some(retry_after) = response.parameters.and_then(|p| p.retry_after) {
                             {
-                                {
-                                    let mut sleep_time = sleep_time_clone.lock().await;
-                                    *sleep_time += retry_after;
-                                }
-                                _ = channel_sender.send(params.clone()).await;
+                                let mut sleep_time = sleep_time_clone.lock().await;
+                                *sleep_time += retry_after;
                             }
+                            _ = channel_sender.send(params.clone()).await;
                         }
                     }
                     Err(e) => {

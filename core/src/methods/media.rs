@@ -1,10 +1,10 @@
 use crate::{
     bot::Bot,
+    FileType,
     models::{message::Message, sticker::FileUpload},
     params::media_params::SendPhotoParams,
     requests,
-    responses::MethodResponse,
-    TelegrapherError,
+    responses::MethodResponse, TelegrapherError,
 };
 use crate::params::media_params::SendDocumentParams;
 
@@ -31,7 +31,7 @@ impl Bot {
             self.token(),
             Some(params),
             &input_file.path,
-            &requests::FileType::Photo,
+            &FileType::Photo,
         )
         .await
     }
@@ -45,7 +45,8 @@ impl Bot {
                 "sendDocument",
                 self.token(),
                 Some(params),
-            ).await;
+            )
+            .await;
         }
 
         let input_file = match &params.document {
@@ -57,7 +58,8 @@ impl Bot {
             self.token(),
             Some(params),
             &input_file.path,
-            &requests::FileType::Document,
-        ).await
+            &FileType::Document,
+        )
+        .await
     }
 }

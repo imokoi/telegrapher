@@ -1,13 +1,13 @@
-use bot::Bot;
-use futures::future::join_all;
-use methods::user;
-use models::{message::Message, update::UpdateContent};
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
-use std::time::Duration;
+
 use tokio::sync::{Mutex, Semaphore};
+
+use bot::Bot;
+use models::{message::Message, update::UpdateContent};
 
 pub mod bot;
 pub mod methods;
@@ -28,11 +28,14 @@ pub trait BotCommands: Sized {
     fn to_vec(enable_skip: bool) -> Vec<Self>;
 }
 
+/// Update handler type
 type UpdateHandler =
     fn(
         Bot,
         UpdateContent,
     ) -> Pin<Box<dyn Future<Output = TelegrapherResult<Option<JsonData>>> + Send>>;
+
+/// Command Handler type
 pub type CommandHandler =
     fn(
         Bot,
@@ -60,21 +63,25 @@ impl EventHandler {
     }
 }
 
+/// Rate limiter for sending messages
+#[derive(Debug)]
 pub struct RateLimiter {
     global_semaphore: Arc<Semaphore>,
     user_chat_semaphores: Arc<Mutex<HashMap<i64, Arc<Semaphore>>>>,
     group_chat_semaphores: Arc<Mutex<HashMap<String, Arc<Semaphore>>>>,
 }
 
-impl RateLimiter {
-    pub fn new() -> Self {
+impl Default for RateLimiter {
+    fn default() -> Self {
         Self {
             global_semaphore: Arc::new(Semaphore::new(1)),
             user_chat_semaphores: Arc::new(Mutex::new(HashMap::new())),
             group_chat_semaphores: Arc::new(Mutex::new(HashMap::new())),
         }
     }
+}
 
+impl RateLimiter {
     pub async fn acquire_global(&self) -> Arc<Semaphore> {
         self.global_semaphore.clone()
     }
@@ -102,13 +109,39 @@ impl RateLimiter {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum FileType {
+    Photo,
+    Video,
+    Document,
+    Audio,
+    Voice,
+    Animation,
+}
+
+impl Display for FileType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            FileType::Photo => "photo".to_string(),
+            FileType::Video => "video".to_string(),
+            FileType::Document => "document".to_string(),
+            FileType::Audio => "audio".to_string(),
+            FileType::Voice => "voice".to_string(),
+            FileType::Animation => "animation".to_string(),
+        };
+        write!(f, "{}", str)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::time::Duration;
+
     use super::*;
 
     #[tokio::test]
     async fn test_rate_limiter() {
-        let rate_limiter = Arc::new(RateLimiter::new());
+        let rate_limiter = Arc::new(RateLimiter::default());
         // 模拟多个并发任务
         let mut tasks = Vec::new();
         for i in 0..10 {
