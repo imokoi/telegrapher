@@ -1,9 +1,10 @@
+use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
+
 use crate::models::{
     message_entity::MessageEntity, parse_mode::ParseMode, reply::ReplyParameters,
     reply_markup::ReplyMarkup, sticker::FileUpload,
 };
-use derive_builder::Builder;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Builder)]
 pub struct SendDocumentParams {
@@ -12,7 +13,7 @@ pub struct SendDocumentParams {
     pub business_connection_id: Option<String>,
 
     #[builder(setter(into))]
-    pub chat_id: String,
+    pub chat_id: i64,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
@@ -72,7 +73,7 @@ pub struct SendPhotoParams {
     pub business_connection_id: Option<String>,
 
     #[builder(setter(into))]
-    pub chat_id: String,
+    pub chat_id: i64,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]

@@ -1,5 +1,3 @@
-use std::{arch::global_asm, time::Duration};
-
 use crate::{
     bot::Bot,
     models::message::Message,
@@ -30,55 +28,18 @@ impl Bot {
         &self,
         params: &SendMessageParams,
     ) -> Result<MethodResponse<Message>, TelegrapherError> {
-        if params.chat_id > 0 {
-            let rate_limiter = self.rate_limiter.clone();
-            let user_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
-            let user_chat_permit = user_chat_sem.acquire_owned().await;
-            if user_chat_permit.is_err() {
-                return Err("User chat semaphore error".into());
-            }
-
-            let global_chat_sem = rate_limiter.acquire_global().await;
-            let global_chat_permit = global_chat_sem.acquire_owned().await;
-            if global_chat_permit.is_err() {
-                return Err("Global chat semaphore error".into());
-            }
-
-            tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
-                drop(global_chat_permit);
-
-                tokio::time::sleep(Duration::from_secs_f32(1.0)).await;
-                drop(user_chat_permit);
-            });
+        if let Ok(_) = self.get_message_send_permissions(params.chat_id).await {
+            requests::post_request::<SendMessageParams, Message>(
+                "sendMessage",
+                self.token(),
+                Some(params),
+            )
+            .await
         } else {
-            let rate_limiter = self.rate_limiter.clone();
-            let group_chat_sem = rate_limiter.acquire_user_chat(params.chat_id).await;
-            let group_chat_permit = group_chat_sem.acquire_owned().await;
-            if group_chat_permit.is_err() {
-                return Err("Group chat semaphore error".into());
-            }
-
-            let global_chat_sem = rate_limiter.acquire_global().await.clone();
-            let global_chat_permit = global_chat_sem.acquire_owned().await;
-            if global_chat_permit.is_err() {
-                return Err("Global chat semaphore error".into());
-            }
-
-            tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000 / 30)).await;
-                drop(global_chat_permit);
-
-                tokio::time::sleep(Duration::from_secs(60 / 20)).await;
-                drop(group_chat_permit);
-            });
+            Err(TelegrapherError::from(
+                "faild to get permission to send message to the chat",
+            ))
         }
-        requests::post_request::<SendMessageParams, Message>(
-            "sendMessage",
-            self.token(),
-            Some(params),
-        )
-        .await
     }
 
     pub async fn edit_message(
@@ -120,7 +81,6 @@ impl Bot {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::{
         models::{
             parse_mode::ParseMode,
@@ -128,6 +88,8 @@ mod tests {
         },
         params::message_params::SendMessageParamsBuilder,
     };
+
+    use super::*;
 
     #[tokio::test]
     async fn test_send_message() {

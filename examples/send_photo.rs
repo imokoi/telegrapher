@@ -10,7 +10,7 @@ async fn main() {
     let photo_path = std::path::Path::new("examples/photo.jpg");
     // let result = bot.send_photo("1393242628", photo_path).await;
     let send_photo_params = SendPhotoParamsBuilder::default()
-        .chat_id("1393242628")
+        .chat_id(1393242628)
         .photo(FileUpload::InputFile(InputFile {
             path: photo_path.to_path_buf(),
         }))
