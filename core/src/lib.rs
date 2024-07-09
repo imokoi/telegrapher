@@ -63,31 +63,51 @@ impl EventHandler {
     }
 }
 
-/// Rate limiter for sending messages
 #[derive(Debug)]
-pub struct RateLimiter {
-    global_semaphore: Arc<Semaphore>,
-    user_chat_semaphores: Arc<Mutex<HashMap<i64, Arc<Semaphore>>>>,
-    group_chat_semaphores: Arc<Mutex<HashMap<String, Arc<Semaphore>>>>,
+pub struct MessageSendLockTime {
+    global: f32,
+    user_chat: f32,
+    group_chat: f32,
 }
 
-impl Default for RateLimiter {
+impl Default for MessageSendLockTime {
     fn default() -> Self {
         Self {
-            global_semaphore: Arc::new(Semaphore::new(1)),
-            user_chat_semaphores: Arc::new(Mutex::new(HashMap::new())),
-            group_chat_semaphores: Arc::new(Mutex::new(HashMap::new())),
+            global: 1.0 / 30.0,
+            user_chat: 1.0,
+            group_chat: 60.0 / 20.0,
         }
     }
 }
 
-impl RateLimiter {
+/// Rate limiter for sending messages
+#[derive(Debug)]
+pub struct RateLimitSemaphore {
+    global: Arc<Semaphore>,
+    user_chat: Arc<Mutex<HashMap<i64, Arc<Semaphore>>>>,
+    group_chat: Arc<Mutex<HashMap<String, Arc<Semaphore>>>>,
+}
+
+impl Default for RateLimitSemaphore {
+    fn default() -> Self {
+        Self {
+            global: Arc::new(Semaphore::new(1)),
+            user_chat: Arc::new(Mutex::new(HashMap::new())),
+            group_chat: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
+}
+
+// 30 messages per second
+// 1 message per second inside particular chat
+// 20 messages per minute to the same group.
+impl RateLimitSemaphore {
     pub async fn acquire_global(&self) -> Arc<Semaphore> {
-        self.global_semaphore.clone()
+        self.global.clone()
     }
 
     pub async fn acquire_user_chat(&self, chat_id: i64) -> Arc<Semaphore> {
-        let mut user_chat_semaphores = self.user_chat_semaphores.lock().await;
+        let mut user_chat_semaphores = self.user_chat.lock().await;
         let sem = {
             user_chat_semaphores
                 .entry(chat_id)
@@ -98,7 +118,7 @@ impl RateLimiter {
     }
 
     pub async fn acquire_group_chat(&self, chat_id: String) -> Arc<Semaphore> {
-        let mut group_chat_semaphores = self.group_chat_semaphores.lock().await;
+        let mut group_chat_semaphores = self.group_chat.lock().await;
         let sem = {
             group_chat_semaphores
                 .entry(chat_id)
@@ -141,8 +161,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_rate_limiter() {
-        let rate_limiter = Arc::new(RateLimiter::default());
-        // 模拟多个并发任务
+        let rate_limiter = Arc::new(RateLimitSemaphore::default());
         let mut tasks = Vec::new();
         for i in 0..10 {
             let rate_limiter = rate_limiter.clone();
@@ -163,7 +182,6 @@ mod tests {
             tasks.push(task);
         }
 
-        // 等待所有任务完成
         for task in tasks {
             task.await.unwrap();
         }

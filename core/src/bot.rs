@@ -1,4 +1,5 @@
 use std::{borrow::BorrowMut, cell::RefCell, ops::DerefMut, sync::Arc};
+use std::time::Duration;
 
 use axum::{
     handler,
@@ -13,11 +14,11 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::{
     BotCommands,
     CommandHandler,
-    EventHandler, JsonData, models::{
+    EventHandler, JsonData, MessageSendLockTime, models::{
         allowed_update::AllowedUpdate,
         update::{Update, UpdateContent},
-    }, params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder}, RateLimiter, TelegrapherError,
-    TelegrapherResult, UpdateHandler,
+    }, params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder}, RateLimitSemaphore,
+    TelegrapherError, TelegrapherResult, UpdateHandler,
 };
 
 #[must_use]
@@ -25,16 +26,25 @@ use crate::{
 pub struct Bot {
     pub token: Arc<String>,
     pub handler: Arc<Mutex<EventHandler>>,
-    pub rate_limiter: Arc<RateLimiter>,
+    pub rate_limiter: Arc<RateLimitSemaphore>,
+    pub message_send_lock_time: Arc<MessageSendLockTime>,
     pub message_sender: Arc<Mutex<Option<mpsc::Sender<SendMessageParams>>>>,
 }
 
 impl Bot {
-    pub fn new(token: &str) -> Self {
+    pub fn new(token: &str, instance_count: i32) -> Self {
+        let default_sender_sleep_times = MessageSendLockTime::default();
+        let new_sender_sleep_times = MessageSendLockTime {
+            global: default_sender_sleep_times.global * instance_count as f32,
+            user_chat: default_sender_sleep_times.user_chat * instance_count as f32,
+            group_chat: default_sender_sleep_times.group_chat * instance_count as f32,
+        };
+
         Self {
             token: Arc::new(token.to_string()),
             handler: Arc::new(Mutex::new(EventHandler::default())),
-            rate_limiter: Arc::new(RateLimiter::default()),
+            rate_limiter: Arc::new(RateLimitSemaphore::default()),
+            message_send_lock_time: Arc::new(new_sender_sleep_times),
             message_sender: Arc::new(Mutex::new(None)),
         }
     }
@@ -166,11 +176,76 @@ impl Bot {
             });
         }
     }
+
+    pub async fn get_message_send_permissions(
+        &self,
+        chat_id: i64,
+    ) -> Result<bool, TelegrapherError> {
+        if chat_id > 0 {
+            let rate_limiter = self.rate_limiter.clone();
+            let user_chat_sem = rate_limiter.acquire_user_chat(chat_id).await;
+            let user_chat_permit = user_chat_sem.acquire_owned().await;
+            if user_chat_permit.is_err() {
+                return Err("User chat semaphore error".into());
+            }
+
+            let global_chat_sem = rate_limiter.acquire_global().await;
+            let global_chat_permit = global_chat_sem.acquire_owned().await;
+            if global_chat_permit.is_err() {
+                return Err("Global chat semaphore error".into());
+            }
+
+            let self_clone = self.clone();
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_secs_f32(
+                    self_clone.message_send_lock_time.global,
+                ))
+                .await;
+                drop(global_chat_permit);
+
+                tokio::time::sleep(Duration::from_secs_f32(
+                    self_clone.message_send_lock_time.user_chat,
+                ))
+                .await;
+                drop(user_chat_permit);
+            });
+        } else {
+            let rate_limiter = self.rate_limiter.clone();
+            let group_chat_sem = rate_limiter.acquire_user_chat(chat_id).await;
+            let group_chat_permit = group_chat_sem.acquire_owned().await;
+            if group_chat_permit.is_err() {
+                return Err("Group chat semaphore error".into());
+            }
+
+            let global_chat_sem = rate_limiter.acquire_global().await.clone();
+            let global_chat_permit = global_chat_sem.acquire_owned().await;
+            if global_chat_permit.is_err() {
+                return Err("Global chat semaphore error".into());
+            }
+
+            let self_clone = self.clone();
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_secs_f32(
+                    self_clone.message_send_lock_time.global,
+                ))
+                .await;
+                drop(global_chat_permit);
+
+                tokio::time::sleep(Duration::from_secs_f32(
+                    self_clone.message_send_lock_time.group_chat,
+                ))
+                .await;
+                drop(group_chat_permit);
+            });
+        }
+
+        Ok(true)
+    }
 }
 
 impl Bot {
     fn new_router(&self) -> Router {
-        let router = Router::new()
+        Router::new()
             .route("/ping", get(Self::ping))
             .route("/webhook", post(Self::webhook_update))
             .layer(
@@ -179,8 +254,7 @@ impl Bot {
                     .allow_methods(Any)
                     .allow_headers(Any),
             )
-            .layer(Extension(self.clone()));
-        return router;
+            .layer(Extension(self.clone()))
     }
 
     async fn ping() -> &'static str {

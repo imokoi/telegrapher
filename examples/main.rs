@@ -1,14 +1,15 @@
+use std::{future::Future, pin::Pin};
+
 use core::{
     bot::Bot,
-    models::{message::Message, update::UpdateContent},
-    BotCommands, JsonData, TelegrapherResult,
+    BotCommands,
+    JsonData, models::{message::Message, update::UpdateContent}, TelegrapherResult,
 };
-use macros::{event_handler, BotCommands};
-use std::{future::Future, pin::Pin};
+use macros::{BotCommands, event_handler};
 
 #[tokio::main]
 async fn main() {
-    let mut bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
+    let mut bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
     // bot.register_commands(BotCommand, handler);
 
     let commands = Commands::HelpMessage;

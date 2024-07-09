@@ -1,10 +1,12 @@
-use core::{bot::Bot, params::message_params::SendMessageParamsBuilder};
 use std::sync::Arc;
+
 use tokio::time::Duration;
+
+use core::{bot::Bot, params::message_params::SendMessageParamsBuilder};
 
 #[tokio::main]
 async fn main() {
-    let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
+    let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
     let bot_copy = bot.clone();
     tokio::spawn(async move {
         bot_copy.start_message_channel_monitor().await;

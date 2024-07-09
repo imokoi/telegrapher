@@ -1,17 +1,18 @@
+use std::{future::Future, pin::Pin};
+
 use core::{
     bot::Bot,
+    BotCommands,
+    JsonData,
     models::{message::Message, update::UpdateContent},
-    params::{message_params::SendMessageParamsBuilder, webhook_param::SetWebhookParamsBuilder},
-    responses::build_webhook_response,
-    BotCommands, JsonData, TelegrapherResult,
+    params::{message_params::SendMessageParamsBuilder, webhook_param::SetWebhookParamsBuilder}, responses::build_webhook_response, TelegrapherResult,
 };
-use macros::event_handler;
 use macros::BotCommands;
-use std::{future::Future, pin::Pin};
+use macros::event_handler;
 
 #[tokio::main]
 async fn main() {
-    let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
+    let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
     let set_webhook_params = SetWebhookParamsBuilder::default()
         .url("https://namidev.com/webhook")
         .build()
