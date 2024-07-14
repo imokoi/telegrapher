@@ -49,23 +49,17 @@ pub struct SendMessageParams {
 pub struct EditMessageTextParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<i64>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message_id: Option<i64>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_message_id: Option<String>,
     pub text: String,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parse_mode: Option<ParseMode>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<MessageEntity>>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub link_preview_options: Option<LinkPreviewOptions>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reply_markup: Option<InlineKeyboardMarkup>,
 }
@@ -80,9 +74,14 @@ pub struct DeleteMessageParams {
 #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, Builder)]
 #[builder(setter(into), default)]
 pub struct EditMessageReplyMarkupParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub business_connection_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_id: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message_id: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_message_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub reply_markup: Option<InlineKeyboardMarkup>,
 }
