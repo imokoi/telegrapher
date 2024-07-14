@@ -1,3 +1,5 @@
+use derive_builder::Builder;
+
 use crate::models::{
     link_preview::LinkPreviewOptions,
     message_entity::MessageEntity,
@@ -5,7 +7,6 @@ use crate::models::{
     reply::ReplyParameters,
     reply_markup::{InlineKeyboardMarkup, ReplyMarkup},
 };
-use derive_builder::Builder;
 
 #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, Builder)]
 #[builder(setter(into), default)]
@@ -74,4 +75,14 @@ pub struct EditMessageTextParams {
 pub struct DeleteMessageParams {
     pub chat_id: i64,
     pub message_id: i64,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, Builder)]
+#[builder(setter(into), default)]
+pub struct EditMessageReplyMarkupParams {
+    pub business_connection_id: Option<String>,
+    pub chat_id: Option<i64>,
+    pub message_id: Option<i64>,
+    pub inline_message_id: Option<String>,
+    pub reply_markup: Option<InlineKeyboardMarkup>,
 }

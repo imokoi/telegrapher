@@ -9,6 +9,7 @@ use crate::{
     responses::MethodResponse,
     TelegrapherError,
 };
+use crate::params::message_params::EditMessageReplyMarkupParams;
 
 impl Bot {
     /// Send a message to the message channel. this method will retry with retry_after time automatically.
@@ -28,7 +29,7 @@ impl Bot {
         &self,
         params: &SendMessageParams,
     ) -> Result<MethodResponse<Message>, TelegrapherError> {
-        if let Ok(_) = self.get_message_send_permissions(params.chat_id).await {
+        if (self.get_message_send_permissions(params.chat_id).await).is_ok() {
             requests::post_request::<SendMessageParams, Message>(
                 "sendMessage",
                 self.token(),
@@ -37,7 +38,7 @@ impl Bot {
             .await
         } else {
             Err(TelegrapherError::from(
-                "faild to get permission to send message to the chat",
+                "failed to get permission to send message to the chat",
             ))
         }
     }
@@ -48,6 +49,18 @@ impl Bot {
     ) -> Result<MethodResponse<Message>, TelegrapherError> {
         requests::post_request::<EditMessageTextParams, Message>(
             "editMessageText",
+            self.token(),
+            Some(params),
+        )
+        .await
+    }
+
+    pub async fn edit_message_reply_markup(
+        &self,
+        params: &EditMessageReplyMarkupParams,
+    ) -> Result<MethodResponse<Message>, TelegrapherError> {
+        requests::post_request::<EditMessageReplyMarkupParams, Message>(
+            "editMessageReplyMarkup",
             self.token(),
             Some(params),
         )
@@ -93,7 +106,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_send_message() {
-        let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
+        let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
         let raw_str = r#"
         *bold text*
         "#;
