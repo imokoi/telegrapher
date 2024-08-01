@@ -9,7 +9,7 @@ use macros::{BotCommands, event_handler};
 
 #[tokio::main]
 async fn main() {
-    let mut bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
+    let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
     // bot.register_commands(BotCommand, handler);
 
     let commands = Commands::HelpMessage;

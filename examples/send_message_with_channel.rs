@@ -12,7 +12,7 @@ async fn main() {
         loop {
             let params = SendMessageParamsBuilder::default()
                 .text("Hello")
-                .chat_id(-1002198289004 as i64)
+                .chat_id((-1002198289004_i64))
                 .build()
                 .unwrap();
             let result = bot_clone.send_message_throttled(&params).await;
