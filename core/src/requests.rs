@@ -1,11 +1,11 @@
-use std::{fmt::Debug, path::PathBuf, time::Duration};
 use std::fmt::Display;
+use std::{fmt::Debug, path::PathBuf, time::Duration};
 
 use reqwest::multipart::{self, Part};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use crate::{FileType, responses::MethodResponse, TELEGRAM_API_URL, TelegrapherError};
+use crate::{responses::MethodResponse, FileType, TelegrapherError, TELEGRAM_API_URL};
 
 /// post a normal http request to the telegram api
 pub async fn post_request<P, T>(
@@ -125,7 +125,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_do_request() {
-        let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
+        let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
         let result = post_request::<String, User>("getMe", bot.token(), None).await;
         assert!(result.is_ok());
     }

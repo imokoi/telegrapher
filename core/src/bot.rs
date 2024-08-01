@@ -1,23 +1,23 @@
-use std::{borrow::BorrowMut, cell::RefCell, ops::DerefMut, sync::Arc};
 use std::time::Duration;
+use std::{borrow::BorrowMut, cell::RefCell, ops::DerefMut, sync::Arc};
 
 use axum::{
     handler,
     routing::{get, post},
 };
-use axum::{Extension, response::IntoResponse};
+use axum::{response::IntoResponse, Extension};
 use axum::{Json, Router};
 use serde_json::json;
 use tokio::sync::{mpsc, Mutex};
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::{
-    BotCommands,
-    CommandHandler,
-    EventHandler, JsonData, MessageSendLockTime, models::{
+    models::{
         allowed_update::AllowedUpdate,
         update::{Update, UpdateContent},
-    }, params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder}, RateLimitSemaphore,
+    },
+    params::{message_params::SendMessageParams, updates_params::GetUpdatesParamsBuilder},
+    BotCommands, CommandHandler, EventHandler, JsonData, MessageSendLockTime, RateLimitSemaphore,
     TelegrapherError, TelegrapherResult, UpdateHandler,
 };
 
@@ -265,12 +265,10 @@ impl Bot {
         Extension(bot): Extension<Bot>,
         Json(update): Json<Update>,
     ) -> impl IntoResponse {
-        if let Ok(json_data) = bot.process_update(&update.content).await {
-            if let Some(data) = json_data {
-                return Json(data);
-            }
+        if let Ok(Some(json_data)) = bot.process_update(&update.content).await {
+            return Json(json_data);
         }
-        return Json(json!({}));
+        Json(json!({}))
     }
 
     async fn process_update(&self, content: &UpdateContent) -> TelegrapherResult<Option<JsonData>> {
@@ -302,6 +300,6 @@ impl Bot {
                 }
             }
         }
-        return Ok(None);
+        Ok(None)
     }
 }

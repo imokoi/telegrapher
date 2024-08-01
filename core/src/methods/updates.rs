@@ -26,7 +26,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_updates() {
-        let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw");
+        let bot = Bot::new("6616659571:AAEr0TdwPXBnvHQl_VJj5Z6wh-p3uUDNbOw", 1);
         let get_updates_params = GetUpdatesParamsBuilder::default()
             .allowed_updates(vec![AllowedUpdate::Message, AllowedUpdate::CallbackQuery])
             .build()

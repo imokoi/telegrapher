@@ -1,3 +1,4 @@
+use crate::params::message_params::EditMessageReplyMarkupParams;
 use crate::{
     bot::Bot,
     models::message::Message,
@@ -9,7 +10,6 @@ use crate::{
     responses::MethodResponse,
     TelegrapherError,
 };
-use crate::params::message_params::EditMessageReplyMarkupParams;
 
 impl Bot {
     /// Send a message to the message channel. this method will retry with retry_after time automatically.
@@ -74,7 +74,7 @@ impl Bot {
         requests::post_request::<DeleteMessageParams, bool>(
             "deleteMessage",
             self.token(),
-            Some(&params),
+            Some(params),
         )
         .await
     }

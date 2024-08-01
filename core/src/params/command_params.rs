@@ -6,11 +6,9 @@ use serde::{Deserialize, Serialize};
 #[builder(setter(into))]
 pub struct SetMyCommandsParams {
     commands: Vec<BotCommand>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     scope: Option<BotCommandScope>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     language_code: Option<String>,
@@ -21,7 +19,6 @@ pub struct DeleteMyCommandsParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     scope: Option<BotCommandScope>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     language_code: Option<String>,
@@ -32,7 +29,6 @@ pub struct GetMyCommandsParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     scope: Option<BotCommandScope>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     language_code: Option<String>,

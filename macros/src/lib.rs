@@ -13,9 +13,9 @@ pub fn bot_commands_derive(input: TokenStream) -> TokenStream {
 
 fn impl_bot_commands(input: &syn::DeriveInput) -> proc_macro2::TokenStream {
     let name = &input.ident;
-    let data_enum = get_enum_data(&input);
+    let data_enum = get_enum_data(input);
     let fn_as_str = impl_as_str(&data_enum);
-    let fn_vec = impl_to_vec(&name, &data_enum);
+    let fn_vec = impl_to_vec(name, &data_enum);
     let fn_try_into = impl_try_from(&data_enum);
     quote! {
         impl BotCommands for #name {
@@ -52,8 +52,7 @@ fn impl_as_str(data_enum: &DataEnum) -> proc_macro2::TokenStream {
 fn impl_to_vec(name: &Ident, data_enum: &DataEnum) -> proc_macro2::TokenStream {
     let filtered_with_skip_variants = data_enum.variants.iter().filter_map(|variant| {
         let skip = variant.attrs.iter().any(|attr| {
-            attr.path().is_ident("BotCommands")
-                && attr.parse_args::<Ident>().unwrap().to_string() == "skip"
+            attr.path().is_ident("BotCommands") && attr.parse_args::<Ident>().unwrap() == "skip"
         });
         if skip {
             None

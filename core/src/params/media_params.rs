@@ -11,56 +11,42 @@ pub struct SendDocumentParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub business_connection_id: Option<String>,
-
     #[builder(setter(into))]
     pub chat_id: i64,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub message_thread_id: Option<i32>,
-
     #[builder(setter(into))]
     pub document: FileUpload,
-
     #[builder(setter(into, strip_option), default)]
     pub thumbnail: Option<FileUpload>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub caption: Option<String>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub parse_mode: Option<ParseMode>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub caption_entities: Option<Vec<MessageEntity>>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub has_spoiler: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub disable_content_type_detection: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub disable_notification: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub protect_content: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub message_effect_id: Option<String>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub reply_parameters: Option<ReplyParameters>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub reply_markup: Option<ReplyMarkup>,
@@ -71,45 +57,34 @@ pub struct SendPhotoParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub business_connection_id: Option<String>,
-
     #[builder(setter(into))]
     pub chat_id: i64,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub message_thread_id: Option<i32>,
-
     #[builder(setter(into))]
     pub photo: FileUpload,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub caption: Option<String>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub parse_mode: Option<ParseMode>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub caption_entities: Option<Vec<MessageEntity>>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub has_spoiler: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub disable_notification: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub protect_content: Option<bool>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub reply_parameters: Option<ReplyParameters>,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
     pub reply_markup: Option<ReplyMarkup>,
