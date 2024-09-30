@@ -34,8 +34,8 @@ pub struct BusinessLocation {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BusinessOpeningHoursInterval {
-    pub opening_minute: i32,
-    pub closing_minute: i32,
+    pub opening_minute: i64,
+    pub closing_minute: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

@@ -32,12 +32,12 @@ pub struct Bot {
 }
 
 impl Bot {
-    pub fn new(token: &str, instance_count: i32) -> Self {
+    pub fn new(token: &str, instance_count: i64) -> Self {
         let default_sender_sleep_times = MessageSendLockTime::default();
         let new_sender_sleep_times = MessageSendLockTime {
-            global: default_sender_sleep_times.global * instance_count as f32,
-            user_chat: default_sender_sleep_times.user_chat * instance_count as f32,
-            group_chat: default_sender_sleep_times.group_chat * instance_count as f32,
+            global: default_sender_sleep_times.global * instance_count as f64,
+            user_chat: default_sender_sleep_times.user_chat * instance_count as f64,
+            group_chat: default_sender_sleep_times.group_chat * instance_count as f64,
         };
 
         Self {
@@ -197,13 +197,13 @@ impl Bot {
 
             let self_clone = self.clone();
             tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_secs_f32(
+                tokio::time::sleep(Duration::from_secs_f64(
                     self_clone.message_send_lock_time.global,
                 ))
                 .await;
                 drop(global_chat_permit);
 
-                tokio::time::sleep(Duration::from_secs_f32(
+                tokio::time::sleep(Duration::from_secs_f64(
                     self_clone.message_send_lock_time.user_chat,
                 ))
                 .await;
@@ -225,13 +225,13 @@ impl Bot {
 
             let self_clone = self.clone();
             tokio::spawn(async move {
-                tokio::time::sleep(Duration::from_secs_f32(
+                tokio::time::sleep(Duration::from_secs_f64(
                     self_clone.message_send_lock_time.global,
                 ))
                 .await;
                 drop(global_chat_permit);
 
-                tokio::time::sleep(Duration::from_secs_f32(
+                tokio::time::sleep(Duration::from_secs_f64(
                     self_clone.message_send_lock_time.group_chat,
                 ))
                 .await;

@@ -37,7 +37,7 @@ use super::{chat::Chat, user::User};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MessageId {
-    pub message_id: i32,
+    pub message_id: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -50,7 +50,7 @@ pub enum MaybeInaccessibleMessage {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct InaccessibleMessage {
     pub chat: Chat,
-    pub message_id: i32,
+    pub message_id: i64,
     pub date: u64,
 }
 
@@ -61,9 +61,9 @@ pub struct MessageAutoDeleteTimerChanged {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Message {
-    pub message_id: i32,
+    pub message_id: i64,
     /// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
-    pub message_thread_id: Option<i32>,
+    pub message_thread_id: Option<i64>,
     /// message sender
     pub from: Option<Box<User>>,
     /// sender chat

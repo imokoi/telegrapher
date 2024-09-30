@@ -56,7 +56,7 @@ async fn main() {
     // }
 }
 
-async fn request_api(bot: &Bot, chat_id: i32) {
+async fn request_api(bot: &Bot, chat_id: i64) {
     let params = SendMessageParamsBuilder::default()
         .text("Hello")
         .chat_id(chat_id)

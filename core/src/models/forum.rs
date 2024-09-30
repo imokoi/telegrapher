@@ -49,13 +49,13 @@ pub struct SharedUser {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UsersShared {
-    pub request_id: i32,
+    pub request_id: i64,
     pub users: Vec<SharedUser>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChatShared {
-    pub request_id: i32,
+    pub request_id: i64,
     pub chat_id: i64,
     pub title: Option<String>,
     pub username: Option<String>,
@@ -71,7 +71,7 @@ pub struct WriteAccessAllowed {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ForumTopic {
-    pub message_thread_id: i32,
+    pub message_thread_id: i64,
     pub name: String,
     pub icon_color: u32,
     pub icon_custom_emoji_id: Option<String>,

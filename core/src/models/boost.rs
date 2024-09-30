@@ -26,7 +26,7 @@ pub struct ChatBoostSourceGiftCode {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChatBoostSourceGiveaway {
-    pub giveaway_message_id: i32,
+    pub giveaway_message_id: i64,
     pub user: Option<User>,
     pub is_unclaimed: Option<bool>,
 }

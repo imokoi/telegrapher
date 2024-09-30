@@ -22,7 +22,7 @@ pub struct GiveawayCreated {}
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct GiveawayWinners {
     pub chat: Chat,
-    pub giveaway_message_id: i32,
+    pub giveaway_message_id: i64,
     pub winners_selection_date: u64,
     pub winner_count: u32,
     pub winners: Vec<User>,

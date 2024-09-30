@@ -19,5 +19,5 @@ pub struct Game {
 pub struct GameHighScore {
     pub position: u32,
     pub user: User,
-    pub score: i32,
+    pub score: i64,
 }

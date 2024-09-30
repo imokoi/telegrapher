@@ -37,7 +37,7 @@ pub struct TextQuote {
 pub struct ExternalReplyInfo {
     pub origin: Option<MessageOrigin>,
     pub chat: Option<Chat>,
-    pub message_id: Option<i32>,
+    pub message_id: Option<i64>,
     pub link_preview_options: Option<LinkPreviewOptions>,
     pub animation: Option<Animation>,
     pub audio: Option<Audio>,
@@ -62,8 +62,8 @@ pub struct ExternalReplyInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ReplyParameters {
-    pub message_id: i32,
-    pub chat_id: Option<i32>,
+    pub message_id: i64,
+    pub chat_id: Option<i64>,
     pub allow_sending_without_reply: Option<bool>,
     pub quote: Option<TextQuote>,
     pub quote_parse_mode: Option<String>,
@@ -103,7 +103,7 @@ pub struct MessageOriginChat {
 pub struct MessageOriginChannel {
     pub date: u64,
     pub chat: Chat,
-    pub message_id: i32,
+    pub message_id: i64,
     pub author_signature: Option<String>,
 }
 

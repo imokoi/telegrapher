@@ -83,7 +83,7 @@ pub struct KeyboardButton {
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
 #[builder(setter(into), default)]
 pub struct KeyboardButtonRequestUsers {
-    pub request_id: i32,
+    pub request_id: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_is_bot: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -101,7 +101,7 @@ pub struct KeyboardButtonRequestUsers {
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq, Builder)]
 #[builder(setter(into), default)]
 pub struct KeyboardButtonRequestChat {
-    pub request_id: i32,
+    pub request_id: i64,
     pub chat_is_channel: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub chat_is_forum: Option<bool>,

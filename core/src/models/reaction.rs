@@ -6,7 +6,7 @@ use crate::models::user::User;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct MessageReactionUpdated {
     pub chat: Chat,
-    pub message_id: i32,
+    pub message_id: i64,
     pub user: Option<User>,
     pub actor_chat: Option<Chat>,
     pub date: u64,
@@ -36,13 +36,13 @@ pub struct ReactionCount {
     #[serde(rename = "type")]
     pub type_field: ReactionType,
 
-    pub total_count: i32,
+    pub total_count: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct MessageReactionCountUpdated {
     pub chat: Chat,
-    pub message_id: i32,
+    pub message_id: i64,
     pub date: u64,
     pub reactions: Vec<ReactionCount>,
 }

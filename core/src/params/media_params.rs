@@ -15,7 +15,7 @@ pub struct SendDocumentParams {
     pub chat_id: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
-    pub message_thread_id: Option<i32>,
+    pub message_thread_id: Option<i64>,
     #[builder(setter(into))]
     pub document: FileUpload,
     #[builder(setter(into, strip_option), default)]
@@ -61,7 +61,7 @@ pub struct SendPhotoParams {
     pub chat_id: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(setter(into, strip_option), default)]
-    pub message_thread_id: Option<i32>,
+    pub message_thread_id: Option<i64>,
     #[builder(setter(into))]
     pub photo: FileUpload,
     #[serde(skip_serializing_if = "Option::is_none")]

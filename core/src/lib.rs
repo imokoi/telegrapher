@@ -65,9 +65,9 @@ impl EventHandler {
 
 #[derive(Debug)]
 pub struct MessageSendLockTime {
-    global: f32,
-    user_chat: f32,
-    group_chat: f32,
+    global: f64,
+    user_chat: f64,
+    group_chat: f64,
 }
 
 impl Default for MessageSendLockTime {
