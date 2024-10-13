@@ -7,7 +7,7 @@ use crate::models::user::User;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PollOption {
     pub text: String,
-    pub voter_count: u32,
+    pub voter_count: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -23,7 +23,7 @@ pub struct Poll {
     pub id: String,
     pub question: String,
     pub options: Vec<PollOption>,
-    pub total_voter_count: u32,
+    pub total_voter_count: u64,
     pub is_closed: bool,
     pub is_anonymous: bool,
     #[serde(rename = "type")]
@@ -32,6 +32,6 @@ pub struct Poll {
     pub correct_option_id: Option<u8>,
     pub explanation: Option<String>,
     pub explanation_entities: Option<Vec<MessageEntity>>,
-    pub open_period: Option<u32>,
+    pub open_period: Option<u64>,
     pub close_date: Option<u64>,
 }

@@ -17,7 +17,7 @@ pub struct Game {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct GameHighScore {
-    pub position: u32,
+    pub position: u64,
     pub user: User,
     pub score: i64,
 }

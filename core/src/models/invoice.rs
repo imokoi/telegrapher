@@ -6,5 +6,5 @@ pub struct Invoice {
     pub description: String,
     pub start_parameter: String,
     pub currency: String,
-    pub total_amount: u32,
+    pub total_amount: u64,
 }

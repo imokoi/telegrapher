@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct Audio {
     pub file_id: String,
     pub file_unique_id: String,
-    pub duration: u32,
+    pub duration: u64,
     pub performer: Option<String>,
     pub title: Option<String>,
     pub file_name: Option<String>,

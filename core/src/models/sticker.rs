@@ -12,8 +12,8 @@ pub struct Sticker {
     pub file_unique_id: String,
     #[serde(rename = "type")]
     pub sticker_type: String,
-    pub width: u32,
-    pub height: u32,
+    pub width: u64,
+    pub height: u64,
     pub is_animated: bool,
     pub is_video: bool,
     pub thumbnail: Option<PhotoSize>,

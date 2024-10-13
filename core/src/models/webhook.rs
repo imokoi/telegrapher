@@ -6,7 +6,7 @@ use crate::models::allowed_update::AllowedUpdate;
 pub struct WebhookInfo {
     pub url: String,
     pub has_custom_certificate: bool,
-    pub pending_update_count: u32,
+    pub pending_update_count: u64,
     pub ip_address: Option<String>,
     pub last_error_date: Option<u64>,
     pub last_error_message: Option<String>,

@@ -12,5 +12,5 @@ pub struct AnswerCallbackQueryParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    cache_time: Option<u32>,
+    cache_time: Option<u64>,
 }

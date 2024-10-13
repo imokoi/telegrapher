@@ -32,6 +32,6 @@ pub struct User {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UserProfilePhotos {
-    pub total_count: u32,
+    pub total_count: u64,
     pub photos: Vec<Vec<PhotoSize>>,
 }

@@ -119,7 +119,7 @@ pub fn event_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn make_answer(_item: TokenStream) -> TokenStream {
-    "fn answer() -> u32 { 42 }".parse().unwrap()
+    "fn answer() -> u64 { 42 }".parse().unwrap()
 }
 
 fn get_enum_data(input: &DeriveInput) -> syn::DataEnum {

@@ -29,7 +29,7 @@ use crate::models::web_app::WebAppInfo;
 pub struct TextQuote {
     pub text: String,
     pub entities: Option<Vec<MessageEntity>>,
-    pub position: u32,
+    pub position: u64,
     pub is_manual: Option<bool>,
 }
 
@@ -68,7 +68,7 @@ pub struct ReplyParameters {
     pub quote: Option<TextQuote>,
     pub quote_parse_mode: Option<String>,
     pub quote_entities: Option<Vec<MessageEntity>>,
-    pub quote_position: Option<u32>,
+    pub quote_position: Option<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

@@ -56,7 +56,7 @@ pub struct InaccessibleMessage {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MessageAutoDeleteTimerChanged {
-    pub message_auto_delete_time: u32,
+    pub message_auto_delete_time: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -69,7 +69,7 @@ pub struct Message {
     /// sender chat
     pub sender_chat: Option<Box<Chat>>,
     /// If the sender of the message boosted the chat, the number of boosts added by the user
-    pub sender_boost_count: Option<u32>,
+    pub sender_boost_count: Option<u64>,
     /// The bot that actually sent the message on behalf of the business account. Available only for outgoing messages sent on behalf of the connected business account.
     pub sender_business_bot: Option<Box<User>>,
     /// Date the message was sent in Unix time. It is always a positive number, representing a valid date.

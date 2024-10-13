@@ -11,7 +11,7 @@ use super::reply_markup::InlineKeyboardMarkup;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LabeledPrice {
     pub label: String,
-    pub amount: u32,
+    pub amount: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -34,8 +34,8 @@ pub struct InlineQueryResultArticle {
     pub hide_url: Option<bool>,
     pub description: Option<String>,
     pub thumbnail_url: Option<String>,
-    pub thumbnail_width: Option<u32>,
-    pub thumbnail_height: Option<u32>,
+    pub thumbnail_width: Option<u64>,
+    pub thumbnail_height: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -43,8 +43,8 @@ pub struct InlineQueryResultPhoto {
     pub id: String,
     pub photo_url: String,
     pub thumbnail_url: String,
-    pub photo_width: Option<u32>,
-    pub photo_height: Option<u32>,
+    pub photo_width: Option<u64>,
+    pub photo_height: Option<u64>,
     pub title: Option<String>,
     pub description: Option<String>,
     pub caption: Option<String>,
@@ -58,9 +58,9 @@ pub struct InlineQueryResultPhoto {
 pub struct InlineQueryResultGif {
     pub id: String,
     pub gif_url: String,
-    pub gif_width: Option<u32>,
-    pub gif_height: Option<u32>,
-    pub gif_duration: Option<u32>,
+    pub gif_width: Option<u64>,
+    pub gif_height: Option<u64>,
+    pub gif_duration: Option<u64>,
     pub thumbnail_url: String,
     pub thumbnail_mime_type: Option<String>,
     pub title: Option<String>,
@@ -75,9 +75,9 @@ pub struct InlineQueryResultGif {
 pub struct InlineQueryResultMpeg4Gif {
     pub id: String,
     pub mpeg4_url: String,
-    pub mpeg4_width: Option<u32>,
-    pub mpeg4_height: Option<u32>,
-    pub mpeg4_duration: Option<u32>,
+    pub mpeg4_width: Option<u64>,
+    pub mpeg4_height: Option<u64>,
+    pub mpeg4_duration: Option<u64>,
     pub thumbnail_url: String,
     pub thumbnail_mime_type: Option<String>,
     pub title: Option<String>,
@@ -98,9 +98,9 @@ pub struct InlineQueryResultVideo {
     pub caption: Option<String>,
     pub parse_mode: Option<ParseMode>,
     pub caption_entities: Option<Vec<MessageEntity>>,
-    pub video_width: Option<u32>,
-    pub video_height: Option<u32>,
-    pub video_duration: Option<u32>,
+    pub video_width: Option<u64>,
+    pub video_height: Option<u64>,
+    pub video_duration: Option<u64>,
     pub description: Option<String>,
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
@@ -115,7 +115,7 @@ pub struct InlineQueryResultAudio {
     pub parse_mode: Option<ParseMode>,
     pub caption_entities: Option<Vec<MessageEntity>>,
     pub performer: Option<String>,
-    pub audio_duration: Option<u32>,
+    pub audio_duration: Option<u64>,
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
 }
@@ -128,7 +128,7 @@ pub struct InlineQueryResultVoice {
     pub caption: Option<String>,
     pub parse_mode: Option<ParseMode>,
     pub caption_entities: Option<Vec<MessageEntity>>,
-    pub voice_duration: Option<u32>,
+    pub voice_duration: Option<u64>,
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
 }
@@ -146,8 +146,8 @@ pub struct InlineQueryResultDocument {
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
     pub thumbnail_url: Option<String>,
-    pub thumbnail_width: Option<u32>,
-    pub thumbnail_height: Option<u32>,
+    pub thumbnail_width: Option<u64>,
+    pub thumbnail_height: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -157,14 +157,14 @@ pub struct InlineQueryResultLocation {
     pub longitude: f64,
     pub title: String,
     pub horizontal_accuracy: Option<f64>,
-    pub live_period: Option<u32>,
+    pub live_period: Option<u64>,
     pub heading: Option<u16>,
-    pub proximity_alert_radius: Option<u32>,
+    pub proximity_alert_radius: Option<u64>,
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
     pub thumbnail_url: Option<String>,
-    pub thumbnail_width: Option<u32>,
-    pub thumbnail_height: Option<u32>,
+    pub thumbnail_width: Option<u64>,
+    pub thumbnail_height: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -181,8 +181,8 @@ pub struct InlineQueryResultVenue {
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
     pub thumbnail_url: Option<String>,
-    pub thumbnail_width: Option<u32>,
-    pub thumbnail_height: Option<u32>,
+    pub thumbnail_width: Option<u64>,
+    pub thumbnail_height: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -195,8 +195,8 @@ pub struct InlineQueryResultContact {
     pub reply_markup: Option<InlineKeyboardMarkup>,
     pub input_message_content: Option<InputMessageContent>,
     pub thumbnail_url: Option<String>,
-    pub thumbnail_width: Option<u32>,
-    pub thumbnail_height: Option<u32>,
+    pub thumbnail_width: Option<u64>,
+    pub thumbnail_height: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -313,9 +313,9 @@ pub struct InputLocationMessageContent {
     pub latitude: f64,
     pub longitude: f64,
     pub horizontal_accuracy: Option<f64>,
-    pub live_period: Option<u32>,
+    pub live_period: Option<u64>,
     pub heading: Option<u16>,
-    pub proximity_alert_radius: Option<u32>,
+    pub proximity_alert_radius: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -346,13 +346,13 @@ pub struct InputInvoiceMessageContent {
     pub provider_token: String,
     pub currency: String,
     pub prices: Vec<LabeledPrice>,
-    pub max_tip_amount: Option<u32>,
-    pub suggested_tip_amounts: Option<Vec<u32>>,
+    pub max_tip_amount: Option<u64>,
+    pub suggested_tip_amounts: Option<Vec<u64>>,
     pub provider_data: Option<String>,
     pub photo_url: Option<String>,
-    pub photo_size: Option<u32>,
-    pub photo_width: Option<u32>,
-    pub photo_height: Option<u32>,
+    pub photo_size: Option<u64>,
+    pub photo_width: Option<u64>,
+    pub photo_height: Option<u64>,
     pub need_name: Option<bool>,
     pub need_phone_number: Option<bool>,
     pub need_email: Option<bool>,

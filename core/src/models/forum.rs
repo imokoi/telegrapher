@@ -16,7 +16,7 @@ pub struct CallbackGame {}
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ForumTopicCreated {
     pub name: String,
-    pub icon_color: u32,
+    pub icon_color: u64,
     pub icon_custom_emoji_id: Option<String>,
 }
 
@@ -73,6 +73,6 @@ pub struct WriteAccessAllowed {
 pub struct ForumTopic {
     pub message_thread_id: i64,
     pub name: String,
-    pub icon_color: u32,
+    pub icon_color: u64,
     pub icon_custom_emoji_id: Option<String>,
 }

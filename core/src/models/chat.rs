@@ -68,8 +68,8 @@ pub struct ChatInviteLink {
     pub is_revoked: bool,
     pub name: Option<String>,
     pub expire_date: Option<u64>,
-    pub member_limit: Option<u32>,
-    pub pending_join_request_count: Option<u32>,
+    pub member_limit: Option<u64>,
+    pub pending_join_request_count: Option<u64>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]

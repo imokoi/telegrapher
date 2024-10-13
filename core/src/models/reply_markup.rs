@@ -89,7 +89,7 @@ pub struct KeyboardButtonRequestUsers {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_is_premium: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_quantity: Option<u32>,
+    pub max_quantity: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub request_name: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -13,7 +13,7 @@ pub struct ShippingQuery {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LabeledPrice {
     pub label: String,
-    pub amount: u32,
+    pub amount: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

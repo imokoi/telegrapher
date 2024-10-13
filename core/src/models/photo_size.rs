@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct PhotoSize {
     pub file_id: String,
     pub file_unique_id: String,
-    pub width: u32,
-    pub height: u32,
+    pub width: u64,
+    pub height: u64,
     pub file_size: Option<u64>,
 }
