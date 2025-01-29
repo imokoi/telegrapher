@@ -55,6 +55,18 @@ impl Bot {
         .await
     }
 
+    pub async fn edit_message_caption(
+        &self,
+        params: &EditMessageTextParams,
+    ) -> Result<MethodResponse<Message>, TelegrapherError> {
+        requests::post_request::<EditMessageTextParams, Message>(
+            "editMessageCaption",
+            self.token(),
+            Some(params),
+        )
+        .await
+    }
+
     pub async fn edit_message_reply_markup(
         &self,
         params: &EditMessageReplyMarkupParams,

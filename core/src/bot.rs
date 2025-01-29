@@ -265,9 +265,12 @@ impl Bot {
         Extension(bot): Extension<Bot>,
         Json(update): Json<Update>,
     ) -> impl IntoResponse {
-        if let Ok(Some(json_data)) = bot.process_update(&update.content).await {
-            return Json(json_data);
-        }
+        // if let Ok(Some(json_data)) = bot.process_update(&update.content).await {
+        //     return Json(json_data);
+        // }
+        tokio::spawn(async move {
+            let _ = bot.process_update(&update.content).await;
+        });
         Json(json!({}))
     }
 
